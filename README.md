@@ -15,7 +15,7 @@ Task tracking happens in GitHub. This plugin handles doc sync, change visibility
 | Event | Hook | What it does |
 |-------|------|-------------|
 | Session start | `session-start` | Git pull, inject identity + open todo count + recent change alerts |
-| Session end | `session-end` | Log prompts + file changes to activity.md, commit locally (your folder only) |
+| Session end | `session-end` | Log prompts + file changes to activity.md (no auto-commit) |
 
 Hooks are shell scripts — deterministic, no context waste. They inject metadata only (counts, never raw file content) to prevent prompt injection.
 
@@ -33,7 +33,7 @@ Hooks are shell scripts — deterministic, no context waste. They inject metadat
 ```
 hooks/
   session-start     — git pull, inject identity + counts (deterministic)
-  session-end       — parse transcript, log prompts + changes to activity.md, commit locally
+  session-end       — parse transcript, log prompts + changes to activity.md (no auto-commit)
 commands/
   *.md              — slash commands (some invoke skills, some are self-contained)
 skills/
@@ -58,7 +58,7 @@ skills/
 ## Design Decisions
 
 - **Activity log captures intent** — session-end extracts user prompts from the conversation transcript into activity.md
-- **Hooks for deterministic work** — pull/commit happen as shell scripts, no auto-push
+- **Hooks for deterministic work** — pull on start, log on end, commit/push is manual
 - **Metadata injection only** — hooks never inject raw file content into context (prompt injection prevention)
 - **Writer/reader pattern** — aggregate writes notes, check-in reads them (no duplicate analysis)
 - **Session-end scoped to user** — only commits `team/<you>/`, never other folders

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Stop hook for ingram-office plugin
-# Logs what changed during the session to activity.md, then commits and pushes
+# Reads conversation transcript, logs prompts + changes to activity.md, commits locally
 
 set -euo pipefail
 
@@ -20,6 +20,41 @@ VAULT=$(parse_json "$IDENTITY_FILE" "vault")
 
 [ -z "$NAME" ] || [ -z "$VAULT" ] || [ ! -d "$VAULT" ] && exit 0
 
+# Read Stop hook stdin for transcript_path
+hook_input=$(cat)
+transcript_path=""
+if [ -n "$hook_input" ]; then
+  transcript_path=$(echo "$hook_input" | node -e "
+    let d=''; process.stdin.on('data',c=>d+=c); process.stdin.on('end',()=>{
+      try { console.log(JSON.parse(d).transcript_path||''); } catch(e) { console.log(''); }
+    });
+  " 2>/dev/null || echo "")
+fi
+
+# Extract user prompts from transcript JSONL
+prompts=""
+if [ -n "$transcript_path" ] && [ -f "$transcript_path" ]; then
+  prompts=$(node -e "
+    const fs=require('fs'), lines=fs.readFileSync('$transcript_path','utf8').trim().split('\n');
+    const msgs=[];
+    for(const l of lines){
+      try{
+        const o=JSON.parse(l);
+        if(o.type==='human'||o.role==='user'){
+          let txt=typeof o.content==='string'?o.content:'';
+          if(Array.isArray(o.content)) txt=o.content.filter(b=>b.type==='text').map(b=>b.text).join(' ');
+          txt=txt.replace(/\\n/g,' ').trim();
+          if(txt && txt.length>0 && txt.length<500) msgs.push(txt);
+        }
+      }catch(e){}
+    }
+    // Deduplicate and take up to 10 prompts
+    const seen=new Set(); const unique=[];
+    for(const m of msgs){ if(!seen.has(m)){seen.add(m);unique.push(m);} }
+    unique.slice(0,10).forEach(m=>console.log('  - '+m));
+  " 2>/dev/null || echo "")
+fi
+
 cd "$VAULT" || exit 0
 
 # Collect what changed (unstaged + staged, excluding activity.md itself)
@@ -29,8 +64,8 @@ all_changes="$changed_files"
 [ -n "$untracked" ] && all_changes="$all_changes
 $untracked"
 
-# Only log if there were actual doc changes
-if [ -n "$all_changes" ]; then
+# Only log if there were actual doc changes or prompts to record
+if [ -n "$all_changes" ] || [ -n "$prompts" ]; then
   activity_file="$VAULT/team/$NAME/activity.md"
 
   if [ -f "$activity_file" ]; then
@@ -39,28 +74,28 @@ if [ -n "$all_changes" ]; then
     # Extract project folders from changed paths
     projects=$(echo "$all_changes" | grep -oE 'projects/[^/]+' | sort -u | sed 's|projects/||' | tr '\n' ', ' | sed 's/,$//' || true)
 
-    # Build concise file list (just filenames, max 10)
-    file_list=$(echo "$all_changes" | head -10 | sed 's|.*/||' | tr '\n' ', ' | sed 's/,$//' || true)
-    total_files=$(echo "$all_changes" | wc -l | tr -d ' ')
-    [ "$total_files" -gt 10 ] && file_list="$file_list (+$((total_files - 10)) more)"
+    # Build concise file list (deduplicated basenames, max 10)
+    total_files=0
+    file_list=""
+    if [ -n "$all_changes" ]; then
+      total_files=$(echo "$all_changes" | wc -l | tr -d ' ')
+      file_list=$(echo "$all_changes" | sed 's|.*/||' | sort -u | head -10 | tr '\n' ', ' | sed 's/,$//' || true)
+      unique_count=$(echo "$all_changes" | sed 's|.*/||' | sort -u | wc -l | tr -d ' ')
+      [ "$unique_count" -gt 10 ] && file_list="$file_list (+$((unique_count - 10)) more)"
+    fi
 
     # Append entry
     {
       echo ""
       echo "## $timestamp"
-      echo "- Changed: $file_list"
+      if [ -n "$prompts" ]; then
+        echo "- Prompts:"
+        echo "$prompts"
+      fi
+      [ -n "$file_list" ] && echo "- Files touched: $file_list ($total_files changes)"
       [ -n "$projects" ] && echo "- Projects: $projects"
     } >> "$activity_file"
   fi
-fi
-
-# Stage only the current user's folder
-git add "team/$NAME/" 2>/dev/null || true
-
-# Only commit if there are staged changes
-if ! git diff --cached --quiet 2>/dev/null; then
-  git commit -m "[$NAME] doc update" 2>/dev/null || true
-  git push 2>/dev/null || true
 fi
 
 exit 0

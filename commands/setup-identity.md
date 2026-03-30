@@ -87,7 +87,7 @@ After setup is complete, give the user a brief orientation:
 >
 > **Your files:**
 > - `team/<name>/profile.md` — your bio (what we just filled out)
-> - `team/<name>/task.md` — your personal todo list (only you manage this)
+> - `team/<name>/tasks.md` — your personal todo list (only you manage this)
 > - `team/<name>/activity.md` — automatic log of your doc changes (plugin writes this)
 >
 > **Task tracking happens in GitHub** — the vault is for documentation and coordination.

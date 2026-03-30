@@ -24,7 +24,7 @@ Also get per-person stats:
 git shortlog --since="7 days ago" --summary --numbered -- team/ projects/
 ```
 
-### 2. Generate `/projects/retro/YYYY-WXX.md`
+### 2. Generate `/projects/weekly reports/YYYY-WXX.md`
 
 ```markdown
 # Week Retrospective — YYYY-WXX
@@ -76,7 +76,7 @@ Append to `~/.ingram-office/logs/retro.log`:
 
 ### 4. Commit and Push
 ```bash
-git add projects/retro/
+git add projects/weekly reports/
 git commit -m "[retro] weekly retrospective — YYYY-WXX"
 git push
 ```

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Stop hook for ingram-office plugin
-# Commits and pushes the current user's doc changes
+# Logs what changed during the session to activity.md, then commits and pushes
 
 set -euo pipefail
 
@@ -21,6 +21,38 @@ VAULT=$(parse_json "$IDENTITY_FILE" "vault")
 [ -z "$NAME" ] || [ -z "$VAULT" ] || [ ! -d "$VAULT" ] && exit 0
 
 cd "$VAULT" || exit 0
+
+# Collect what changed (unstaged + staged, excluding activity.md itself)
+changed_files=$(git diff --name-only HEAD 2>/dev/null | grep -v "activity.md" || true)
+untracked=$(git ls-files --others --exclude-standard 2>/dev/null | grep -v "activity.md" || true)
+all_changes="$changed_files"
+[ -n "$untracked" ] && all_changes="$all_changes
+$untracked"
+
+# Only log if there were actual doc changes
+if [ -n "$all_changes" ]; then
+  activity_file="$VAULT/team/$NAME/activity.md"
+
+  if [ -f "$activity_file" ]; then
+    timestamp=$(date +"%Y-%m-%d %H:%M")
+
+    # Extract project folders from changed paths
+    projects=$(echo "$all_changes" | grep -oE 'projects/[^/]+' | sort -u | sed 's|projects/||' | tr '\n' ', ' | sed 's/,$//' || true)
+
+    # Build concise file list (just filenames, max 10)
+    file_list=$(echo "$all_changes" | head -10 | sed 's|.*/||' | tr '\n' ', ' | sed 's/,$//' || true)
+    total_files=$(echo "$all_changes" | wc -l | tr -d ' ')
+    [ "$total_files" -gt 10 ] && file_list="$file_list (+$((total_files - 10)) more)"
+
+    # Append entry
+    {
+      echo ""
+      echo "## $timestamp"
+      echo "- Changed: $file_list"
+      [ -n "$projects" ] && echo "- Projects: $projects"
+    } >> "$activity_file"
+  fi
+fi
 
 # Stage only the current user's folder
 git add "team/$NAME/" 2>/dev/null || true

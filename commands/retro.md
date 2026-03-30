@@ -1,5 +1,5 @@
 ---
-description: "Generate the weekly retrospective — accomplishments, velocity, trends"
+description: "Generate weekly retrospective"
 ---
 
-Use the "ingram-office:weekly-retrospective" skill to generate the weekly retrospective document.
+Use the "ingram-office:weekly-retrospective" skill.

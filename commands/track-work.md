@@ -1,5 +1,5 @@
 ---
-description: "Log activity, process inbox, update tasks, commit and push to the vault"
+description: "Log activity, update tasks, assign work to others"
 ---
 
-Use the "ingram-office:track-work" skill to log work for the current session.
+Use the "ingram-office:track-work" skill.

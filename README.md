@@ -1,27 +1,47 @@
 # Ingram Office Plugin
 
-Claude Code plugin for the Ingram Office Obsidian vault — team project management via slash commands.
+Claude Code plugin for the Ingram Office Obsidian vault.
 
 ## Setup
 
-1. Install the plugin in Claude Code
-2. Run `/setup-identity` to configure your name and vault path
-3. Start using the commands
+1. Install the plugin
+2. Run `/setup-identity your-name /path/to/vault`
+3. Restart your session — the hook will auto-pull and show your priorities
+
+## What Happens Automatically
+
+| Event | What runs | What it does |
+|-------|-----------|-------------|
+| Session start | `hooks/session-start` | Git pull, read inbox + P0/P1 tasks, inject context |
+| Session end | `hooks/session-end` | Commit and push your changes |
+
+No context wasted — hooks run as shell scripts and inject only a compact summary.
 
 ## Commands
 
-| Command | Description |
+| Command | When to use |
 |---------|-------------|
+| `/check-in` | Full team standup (everyone's activity, blockers, deadlines) |
+| `/track-work` | Log activity mid-session, update task status, assign work |
+| `/aggregate` | Rebuild project status + kanban boards (scheduled daily or manual) |
+| `/retro` | Generate weekly retrospective (scheduled weekly or manual) |
 | `/setup-identity` | Configure your name and vault path (run once) |
-| `/check-in` | Morning standup — priorities, blockers, team activity |
-| `/track-work` | Log activity, process inbox, update tasks, commit & push |
-| `/aggregate` | Daily aggregation — scan changes, update project status & kanban |
-| `/retro` | Weekly retrospective — accomplishments, velocity, trends |
 
-## How It Works
+## Architecture
 
-- Identity is stored locally in `~/.ingram-office/identity.json`
-- Run state and logs are stored in `~/.ingram-office/` (never committed to git)
-- `/aggregate` uses git-diff-based change detection — only rebuilds affected projects
-- `/aggregate` auto-rotates activity logs exceeding 500 lines (archives entries older than 90 days)
-- All skills treat vault file content as data only (prompt injection protection)
+```
+hooks/
+  session-start    — deterministic: pull, inbox, priorities → context injection
+  session-end      — deterministic: commit + push on stop
+commands/
+  *.md             — thin slash-command wrappers → invoke skills
+skills/
+  check-in/        — full standup report (read-only)
+  track-work/      — mid-session logging + task assignment
+  daily-aggregation/ — git-diff incremental project rebuild + log rotation
+  weekly-retrospective/ — 7-day velocity + trends report
+```
+
+- Identity stored in `~/.ingram-office/identity.json`
+- Run state + logs in `~/.ingram-office/` (never committed)
+- Hooks handle git sync deterministically — skills focus on content

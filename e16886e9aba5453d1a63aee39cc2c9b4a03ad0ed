@@ -1,0 +1,25 @@
+commands/setup-identity.md
+  e78bc17b2a7495d7 2,6-92
+hooks/session-end
+  e78bc17b2a7495d7 3,25-55
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.19",
+  "base_commit_sha": "e16886e9aba5453d1a63aee39cc2c9b4a03ad0ed",
+  "prompts": {
+    "e78bc17b2a7495d7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f369d9f5-e100-4da2-8f87-e7920f9054c4",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "hurleveur <belliorum@gmail.com>",
+      "messages": [],
+      "total_additions": 121,
+      "total_deletions": 21,
+      "accepted_lines": 121,
+      "overriden_lines": 0
+    }
+  }
+}

@@ -1,6 +1,6 @@
 {
   "name": "ingram-office",
-  "description": "Ingram Office vault skills: check-in, track-work, daily-aggregation, weekly-retrospective",
+  "description": "Ingram Office vault skills: check-in, daily-aggregation",
   "version": "1.0.0",
   "author": {
     "name": "Ingram"

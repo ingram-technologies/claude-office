@@ -35,11 +35,10 @@ hooks/
   session-start     — git pull, inject identity + counts (deterministic)
   session-end       — commit + push your folder only (deterministic)
 commands/
-  *.md              — thin slash-command wrappers → invoke skills
+  *.md              — slash commands (some invoke skills, some are self-contained)
 skills/
   check-in/         — read aggregated notes, recap, todos, profile stamp
   daily-aggregation/ — git-diff scan, per-person project notes, coordination flags
-  weekly-retrospective/ — 7-day summary from git history
 ```
 
 ### Data Flow
@@ -75,4 +74,4 @@ Stored in `~/.ingram-office/` (never committed to git):
 | `identity.json` | Your name and vault path |
 | `aggregation-state.json` | Last commit SHA for incremental diff detection |
 | `logs/daily-aggregation.log` | Run history for debugging |
-| `logs/weekly-retrospective.log` | Run history for debugging |
+| `logs/retro.log` | Run history for debugging |

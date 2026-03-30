@@ -5,6 +5,8 @@ argument-hint: "[your-name] [vault-path]"
 
 This is the onboarding command. It sets up identity, fills out the user's profile, and explains the plugin.
 
+**Key principle:** Write to profile.md progressively — after each section is collected, write it immediately. Don't batch everything at the end. This way if the conversation is interrupted, partial progress is saved.
+
 ## Step 1: Identity
 
 If arguments are provided, parse as `<name>` and `<vault-path>`. Otherwise ask:
@@ -23,37 +25,47 @@ Write `~/.ingram-office/identity.json`:
 
 Verify the vault path exists and contains `CLAUDE.md`. Verify `/team/<name>/` exists. If not, offer to create it from `/team/_new_user/` — copy the folder, replace all `<PUT YOUR NAME HERE>` placeholders with their name.
 
-## Step 2: Fill Out Profile
+## Step 2: Fill Out Profile (Progressive)
 
-Read `/team/<name>/profile.md`. Walk the user through filling out the empty fields in a natural conversation. Ask about:
-
-1. **Role** — What's your role? (e.g., Security Engineer, Full-Stack Developer, DevOps)
-2. **About / Fun fact** — Something about themselves
-3. **Environment**:
-   - OS and version (detect automatically if possible via `uname` or environment variables)
-   - Device (laptop model, desktop)
-   - Shell (detect from `$SHELL` or current shell)
-   - IDEs and editors they use (VS Code, JetBrains, Cursor, Neovim, etc.)
-   - AI coding tools (Claude Code, Copilot, Cursor, etc.)
-   - MCP servers they have configured (check `~/.claude/settings.json` if accessible)
-   - Browser and extensions
-   - Package managers
-4. **Security**:
-   - Disk encryption (BitLocker, FileVault)
-   - Password manager
-   - MFA enabled
-   - Pre-commit hooks
-   - SSH key type
-5. **Contact** — How to reach them (Slack, email)
-6. **Main project** — Which project are they primarily working on? (list the available projects from `/projects/`)
-
-Write all gathered info into `profile.md`, filling in the placeholder fields.
+Read `/team/<name>/profile.md`. Walk the user through each section below. **After each section, write the answers into profile.md immediately** before moving to the next section.
 
 **Auto-detect what you can** — don't ask questions you can answer from the environment:
 - OS: `uname -s` / `$OS` / `$OSTYPE`
 - Shell: `$SHELL` or `$0`
 - Node version, Python version if available
-- Check `~/.claude/settings.json` for MCP servers
+- MCP servers: read `~/.claude/settings.json` if accessible
+
+### 2a. Role & About
+Ask:
+- What's your role? (e.g., Security Engineer, Full-Stack Developer, DevOps)
+- Fun fact — something about themselves (hobby, hot take, superpower)
+
+→ **Write to profile.md** (Role, Joined date, Fun fact)
+
+### 2b. Environment
+Auto-detect OS, shell, and MCP servers. Ask about:
+- Device (laptop model, desktop)
+- IDEs and editors (VS Code, JetBrains, Cursor, Neovim, etc.)
+- AI coding tools (Claude Code, Copilot, Cursor, etc.)
+- Browser and extensions
+- Package managers
+
+→ **Write to profile.md** (full Environment section)
+
+### 2c. Security
+These questions come from our [security guidelines](/projects/security/status.md). Keep it light — just the essentials:
+- Is your disk encrypted? (BitLocker / FileVault)
+- Do you use 1Password? (team default)
+- Is MFA enabled on your work accounts?
+- Do you use a VPN?
+
+→ **Write to profile.md** (Security section)
+
+### 2d. Contact & Project
+- How to reach them (Slack, email)
+- Which project are they primarily working on? (list available projects from `/projects/`)
+
+→ **Write to profile.md** (Contact + note their main project)
 
 ## Step 3: Explain the Plugin
 

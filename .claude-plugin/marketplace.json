@@ -1,0 +1,15 @@
+{
+  "name": "ingram-office",
+  "description": "Ingram Office vault skills for team project management",
+  "owner": {
+    "name": "Ingram"
+  },
+  "plugins": [
+    {
+      "name": "ingram-office",
+      "description": "Ingram Office vault skills: check-in, track-work, daily-aggregation, weekly-retrospective",
+      "version": "1.0.0",
+      "source": "./"
+    }
+  ]
+}

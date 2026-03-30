@@ -1,0 +1,17 @@
+{
+  "name": "ingram-office",
+  "description": "Ingram Office vault skills: check-in, track-work, daily-aggregation, weekly-retrospective",
+  "version": "1.0.0",
+  "author": {
+    "name": "Ingram"
+  },
+  "repository": "https://github.com/ingram/ingram-office-plugin",
+  "license": "MIT",
+  "keywords": [
+    "obsidian",
+    "project-management",
+    "team",
+    "standup",
+    "aggregation"
+  ]
+}

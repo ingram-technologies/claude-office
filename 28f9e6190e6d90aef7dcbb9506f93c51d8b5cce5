@@ -1,0 +1,27 @@
+hooks/session-start
+  e78bc17b2a7495d7 3,9,13-22,29,32,36,40-43,45,47-56,58,60-63,66,70,72-73,76-81,83-85
+hooks/session-end
+  e78bc17b2a7495d7 3,12-18,20-21,27-29
+skills/track-work/SKILL.md
+  e78bc17b2a7495d7 21-30,48-53,67,70-77
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.19",
+  "base_commit_sha": "28f9e6190e6d90aef7dcbb9506f93c51d8b5cce5",
+  "prompts": {
+    "e78bc17b2a7495d7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f369d9f5-e100-4da2-8f87-e7920f9054c4",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "hurleveur <belliorum@gmail.com>",
+      "messages": [],
+      "total_additions": 88,
+      "total_deletions": 47,
+      "accepted_lines": 88,
+      "overriden_lines": 0
+    }
+  }
+}

@@ -1,0 +1,37 @@
+commands/retro.md
+  e78bc17b2a7495d7 2
+skills/daily-aggregation/SKILL.md
+  e78bc17b2a7495d7 3,8,12,14,34,37,40,44,50-51,53-56,58-62,64-65,68,70-72,74-75,77,79,84-85,89,92,97,101-103,105-106
+commands/setup-identity.md
+  e78bc17b2a7495d7 13-14,22-24
+README.md
+  e78bc17b2a7495d7 3,5,11,15-18,22,24-26,31-35
+skills/weekly-retrospective/SKILL.md
+  e78bc17b2a7495d7 3,8,20,23-26,33-43,45-49,51-52,54-57,59-60,63,72-74,88,90-92
+hooks/session-end
+  e78bc17b2a7495d7 3,25,30
+skills/check-in/SKILL.md
+  e78bc17b2a7495d7 3,8,12,16-25,27,29,36-39,41-44,46,48-51,53-54,60-61
+hooks/session-start
+  e78bc17b2a7495d7 3,25,30-33,36-40,43,46-47,49-50,57
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.19",
+  "base_commit_sha": "033f3bb17661c145fd3795402bbc64646bcf2f41",
+  "prompts": {
+    "e78bc17b2a7495d7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f369d9f5-e100-4da2-8f87-e7920f9054c4",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "hurleveur <belliorum@gmail.com>",
+      "messages": [],
+      "total_additions": 161,
+      "total_deletions": 213,
+      "accepted_lines": 161,
+      "overriden_lines": 0
+    }
+  }
+}

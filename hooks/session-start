@@ -1,16 +1,14 @@
 #!/usr/bin/env bash
 # SessionStart hook for ingram-office plugin
-# Deterministic: reads identity, pulls vault, injects SAFE context summary
+# Pulls vault, injects identity + recent doc changes summary
 
 set -euo pipefail
 
 IDENTITY_FILE="$HOME/.ingram-office/identity.json"
 
-# --- 1. Read identity (no python dependency — use node or basic parsing) ---
 if [ ! -f "$IDENTITY_FILE" ]; then
   context="<ingram-office-setup>\nIngram Office plugin is not configured. Run /setup-identity to set your name and vault path before using any commands.\n</ingram-office-setup>"
 else
-  # Parse JSON with node (available everywhere Claude Code runs) falling back to python3
   parse_json() {
     local file="$1" key="$2"
     node -e "console.log(JSON.parse(require('fs').readFileSync('$file','utf8'))['$key'])" 2>/dev/null \
@@ -24,74 +22,39 @@ else
   if [ -z "$NAME" ] || [ -z "$VAULT" ] || [ ! -d "$VAULT" ]; then
     context="<ingram-office-error>\nIdentity file exists but is invalid or vault path missing. Run /setup-identity to fix.\n</ingram-office-error>"
   else
-    # --- 2. Git pull the vault ---
+    # Git pull
     if cd "$VAULT" 2>/dev/null; then
       git pull --rebase=false 2>/dev/null || true
     fi
 
-    # --- 3. Collect COUNTS ONLY — never inject raw file content ---
-    inbox_file="$VAULT/team/$NAME/inbox.md"
-    inbox_count=0
-    if [ -f "$inbox_file" ]; then
-      inbox_count=$(grep -cE '^\s*- \[' "$inbox_file" 2>/dev/null || echo "0")
+    # Count recent changes (last 24h) by other people
+    others_changed=0
+    if cd "$VAULT" 2>/dev/null; then
+      others_changed=$(git log --since="24 hours ago" --name-only --pretty=format:"%an" -- 'team/' 'projects/' 2>/dev/null | grep -v "^$" | head -50 | wc -l | tr -d ' ' || echo "0")
     fi
 
-    tasks_file="$VAULT/team/$NAME/tasks.md"
-    p0_count=0
-    p1_count=0
-    overdue_count=0
-    active_projects=""
-    today=$(date +%Y-%m-%d)
-
-    if [ -f "$tasks_file" ]; then
-      # Count P0/P1 non-completed tasks
-      p0_count=$(grep -cE '#P0\b' "$tasks_file" 2>/dev/null | grep -v '^\s*- \[x\]' | wc -l 2>/dev/null || echo "0")
-      p1_count=$(grep -cE '#P1\b' "$tasks_file" 2>/dev/null | grep -v '^\s*- \[x\]' | wc -l 2>/dev/null || echo "0")
-      p0_count=$(grep '#P0' "$tasks_file" 2>/dev/null | grep -v '\[x\]' | wc -l | tr -d ' ' || echo "0")
-      p1_count=$(grep '#P1' "$tasks_file" 2>/dev/null | grep -v '\[x\]' | wc -l | tr -d ' ' || echo "0")
-
-      # Count overdue (tasks with due:: before today, not completed)
-      overdue_count=$(grep -E '\(due::' "$tasks_file" 2>/dev/null | grep -v '\[x\]' | while IFS= read -r line; do
-        # Extract date portably (no -oP)
-        due_date=$(echo "$line" | sed -n 's/.*(\s*due::\s*\([0-9-]*\)).*/\1/p' || true)
-        if [ -n "$due_date" ] && [[ "$due_date" < "$today" ]]; then
-          echo "1"
-        fi
-      done | wc -l | tr -d ' ' || echo "0")
-
-      # Extract active project tags (in-progress tasks only)
-      active_projects=$(grep '\[/\]' "$tasks_file" 2>/dev/null | grep -o '#project/[^ ]*' | sort -u | tr '\n' ', ' | sed 's/,$//' || true)
+    # Check if personal task.md exists and has items
+    task_file="$VAULT/team/$NAME/task.md"
+    task_count=0
+    if [ -f "$task_file" ]; then
+      task_count=$(grep -cE '^\s*- \[ \]' "$task_file" 2>/dev/null || echo "0")
     fi
 
-    # --- 4. Build SAFE context (counts + metadata only, no raw content) ---
+    # Build context
     summary="<ingram-office-session identity=\"$NAME\" vault=\"$VAULT\">"
     summary="$summary\nYou are working as **$NAME** in the Ingram Office vault at \`$VAULT\`."
-    summary="$summary\nAvailable commands: /check-in, /track-work, /aggregate, /retro, /setup-identity"
-    summary="$summary\nWhen logging activity with /track-work, read the user's tasks.md to determine which project the work belongs to."
+    summary="$summary\nThis vault is a central documentation hub. Task tracking happens in GitHub."
+    summary="$summary\nAvailable commands: /check-in, /aggregate, /retro, /setup-identity"
 
-    if [ -n "$active_projects" ]; then
-      summary="$summary\nActive projects (in-progress tasks): $active_projects"
-    fi
-
-    # Report counts — Claude reads the actual files when it needs details
-    alerts=""
-    [ "$inbox_count" -gt 0 ] && alerts="$alerts\n- **$inbox_count new inbox assignment(s)** — read \`team/$NAME/inbox.md\` for details"
-    [ "$overdue_count" -gt 0 ] && alerts="$alerts\n- **$overdue_count overdue task(s)** — read \`team/$NAME/tasks.md\` for details"
-    [ "$p0_count" -gt 0 ] && alerts="$alerts\n- **$p0_count P0 task(s)** active"
-    [ "$p1_count" -gt 0 ] && alerts="$alerts\n- **$p1_count P1 task(s)** active"
-
-    if [ -n "$alerts" ]; then
-      summary="$summary\n$alerts"
-    else
-      summary="$summary\nNo urgent items."
-    fi
+    [ "$task_count" -gt 0 ] && summary="$summary\n- **$task_count open todo(s)** in your task.md"
+    [ "$others_changed" -gt 0 ] && summary="$summary\n- **Docs changed in last 24h** — run /check-in for details"
 
     summary="$summary\n</ingram-office-session>"
     context="$summary"
   fi
 fi
 
-# --- Output JSON ---
+# Output JSON
 escape_for_json() {
     local s="$1"
     s="${s//\\/\\\\}"

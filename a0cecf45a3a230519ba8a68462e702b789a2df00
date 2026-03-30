@@ -1,0 +1,25 @@
+skills/daily-aggregation/SKILL.md
+  e78bc17b2a7495d7 3,8,10,42,46,53,63,66,69,71,73-80,82-97,99-104,135
+skills/check-in/SKILL.md
+  e78bc17b2a7495d7 3,8,18,23,25-28,30,42,45,47-49,52-53,55,61,66,75-76
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.19",
+  "base_commit_sha": "a0cecf45a3a230519ba8a68462e702b789a2df00",
+  "prompts": {
+    "e78bc17b2a7495d7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f369d9f5-e100-4da2-8f87-e7920f9054c4",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "hurleveur <belliorum@gmail.com>",
+      "messages": [],
+      "total_additions": 66,
+      "total_deletions": 33,
+      "accepted_lines": 66,
+      "overriden_lines": 0
+    }
+  }
+}

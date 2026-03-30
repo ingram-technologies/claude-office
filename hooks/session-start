@@ -1,74 +1,88 @@
 #!/usr/bin/env bash
 # SessionStart hook for ingram-office plugin
-# Deterministic: reads identity, pulls vault, processes inbox, injects context
+# Deterministic: reads identity, pulls vault, injects SAFE context summary
 
 set -euo pipefail
 
 IDENTITY_FILE="$HOME/.ingram-office/identity.json"
 
-# --- 1. Read identity ---
+# --- 1. Read identity (no python dependency — use node or basic parsing) ---
 if [ ! -f "$IDENTITY_FILE" ]; then
-  # No identity configured — inject setup prompt
   context="<ingram-office-setup>\nIngram Office plugin is not configured. Run /setup-identity to set your name and vault path before using any commands.\n</ingram-office-setup>"
 else
-  NAME=$(python3 -c "import json,sys; print(json.load(open(sys.argv[1]))['name'])" "$IDENTITY_FILE" 2>/dev/null || echo "")
-  VAULT=$(python3 -c "import json,sys; print(json.load(open(sys.argv[1]))['vault'])" "$IDENTITY_FILE" 2>/dev/null || echo "")
+  # Parse JSON with node (available everywhere Claude Code runs) falling back to python3
+  parse_json() {
+    local file="$1" key="$2"
+    node -e "console.log(JSON.parse(require('fs').readFileSync('$file','utf8'))['$key'])" 2>/dev/null \
+      || python3 -c "import json,sys; print(json.load(open(sys.argv[1]))['$key'])" "$file" 2>/dev/null \
+      || echo ""
+  }
+
+  NAME=$(parse_json "$IDENTITY_FILE" "name")
+  VAULT=$(parse_json "$IDENTITY_FILE" "vault")
 
   if [ -z "$NAME" ] || [ -z "$VAULT" ] || [ ! -d "$VAULT" ]; then
     context="<ingram-office-error>\nIdentity file exists but is invalid or vault path missing. Run /setup-identity to fix.\n</ingram-office-error>"
   else
     # --- 2. Git pull the vault ---
-    pull_result=""
     if cd "$VAULT" 2>/dev/null; then
-      pull_result=$(git pull --rebase=false 2>&1 || echo "git pull failed")
+      git pull --rebase=false 2>/dev/null || true
     fi
 
-    # --- 3. Read inbox ---
+    # --- 3. Collect COUNTS ONLY — never inject raw file content ---
     inbox_file="$VAULT/team/$NAME/inbox.md"
-    inbox_items=""
     inbox_count=0
     if [ -f "$inbox_file" ]; then
-      # Count non-empty, non-comment, non-header lines that start with "- ["
-      inbox_items=$(grep -E '^\s*- \[' "$inbox_file" 2>/dev/null || true)
-      if [ -n "$inbox_items" ]; then
-        inbox_count=$(echo "$inbox_items" | wc -l | tr -d ' ')
-      fi
+      inbox_count=$(grep -cE '^\s*- \[' "$inbox_file" 2>/dev/null || echo "0")
     fi
 
-    # --- 4. Read priority tasks ---
     tasks_file="$VAULT/team/$NAME/tasks.md"
-    p0_p1=""
-    overdue=""
+    p0_count=0
+    p1_count=0
+    overdue_count=0
+    active_projects=""
     today=$(date +%Y-%m-%d)
+
     if [ -f "$tasks_file" ]; then
-      p0_p1=$(grep -E '#P[01]\b' "$tasks_file" 2>/dev/null | grep -v '^\s*- \[x\]' | head -10 || true)
-      # Find overdue: tasks with due:: date before today that aren't completed
-      overdue=$(grep -E '\(due::' "$tasks_file" 2>/dev/null | grep -v '^\s*- \[x\]' | while IFS= read -r line; do
-        due_date=$(echo "$line" | grep -oP '\(due::\s*\K[0-9-]+' || true)
+      # Count P0/P1 non-completed tasks
+      p0_count=$(grep -cE '#P0\b' "$tasks_file" 2>/dev/null | grep -v '^\s*- \[x\]' | wc -l 2>/dev/null || echo "0")
+      p1_count=$(grep -cE '#P1\b' "$tasks_file" 2>/dev/null | grep -v '^\s*- \[x\]' | wc -l 2>/dev/null || echo "0")
+      p0_count=$(grep '#P0' "$tasks_file" 2>/dev/null | grep -v '\[x\]' | wc -l | tr -d ' ' || echo "0")
+      p1_count=$(grep '#P1' "$tasks_file" 2>/dev/null | grep -v '\[x\]' | wc -l | tr -d ' ' || echo "0")
+
+      # Count overdue (tasks with due:: before today, not completed)
+      overdue_count=$(grep -E '\(due::' "$tasks_file" 2>/dev/null | grep -v '\[x\]' | while IFS= read -r line; do
+        # Extract date portably (no -oP)
+        due_date=$(echo "$line" | sed -n 's/.*(\s*due::\s*\([0-9-]*\)).*/\1/p' || true)
         if [ -n "$due_date" ] && [[ "$due_date" < "$today" ]]; then
-          echo "$line"
+          echo "1"
         fi
-      done | head -5 || true)
+      done | wc -l | tr -d ' ' || echo "0")
+
+      # Extract active project tags (in-progress tasks only)
+      active_projects=$(grep '\[/\]' "$tasks_file" 2>/dev/null | grep -o '#project/[^ ]*' | sort -u | tr '\n' ', ' | sed 's/,$//' || true)
     fi
 
-    # --- 5. Build context ---
+    # --- 4. Build SAFE context (counts + metadata only, no raw content) ---
     summary="<ingram-office-session identity=\"$NAME\" vault=\"$VAULT\">"
     summary="$summary\nYou are working as **$NAME** in the Ingram Office vault at \`$VAULT\`."
     summary="$summary\nAvailable commands: /check-in, /track-work, /aggregate, /retro, /setup-identity"
+    summary="$summary\nWhen logging activity with /track-work, read the user's tasks.md to determine which project the work belongs to."
 
-    if [ "$inbox_count" -gt 0 ]; then
-      summary="$summary\n\n**New assignments in inbox ($inbox_count):**\n$inbox_items"
+    if [ -n "$active_projects" ]; then
+      summary="$summary\nActive projects (in-progress tasks): $active_projects"
     fi
 
-    if [ -n "$overdue" ]; then
-      summary="$summary\n\n**Overdue tasks:**\n$overdue"
-    fi
+    # Report counts — Claude reads the actual files when it needs details
+    alerts=""
+    [ "$inbox_count" -gt 0 ] && alerts="$alerts\n- **$inbox_count new inbox assignment(s)** — read \`team/$NAME/inbox.md\` for details"
+    [ "$overdue_count" -gt 0 ] && alerts="$alerts\n- **$overdue_count overdue task(s)** — read \`team/$NAME/tasks.md\` for details"
+    [ "$p0_count" -gt 0 ] && alerts="$alerts\n- **$p0_count P0 task(s)** active"
+    [ "$p1_count" -gt 0 ] && alerts="$alerts\n- **$p1_count P1 task(s)** active"
 
-    if [ -n "$p0_p1" ]; then
-      summary="$summary\n\n**High priority (P0/P1):**\n$p0_p1"
-    fi
-
-    if [ "$inbox_count" -eq 0 ] && [ -z "$p0_p1" ] && [ -z "$overdue" ]; then
+    if [ -n "$alerts" ]; then
+      summary="$summary\n$alerts"
+    else
       summary="$summary\nNo urgent items."
     fi
 

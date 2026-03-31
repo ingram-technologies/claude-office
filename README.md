@@ -24,8 +24,8 @@ Hooks are shell scripts — deterministic, no context waste. They inject metadat
 | Command | What it does |
 |---------|-------------|
 | `/check-in` | Resume your session — reads per-person notes from `/aggregate`, recaps last work, shows todos, stamps profile |
-| `/aggregate` | Scan git diffs, write per-person Team Notes into each project's status.md, flag coordination needs (daily scheduled) |
-| `/retro` | Weekly retrospective from git history — contributions, coordination, stalled areas (weekly scheduled) |
+| `/aggregate` | Parse activity.md logs + git diffs, write per-person Team Notes into each project's status.md (daily scheduled) |
+| `/retro` | Weekly cross-project synthesis — team velocity, collaboration health, strategic observations (weekly scheduled) |
 | `/setup-identity` | Configure your name and vault path (run once) |
 
 ## Architecture
@@ -35,17 +35,18 @@ hooks/
   session-start     — git pull, inject identity + counts (deterministic)
   session-end       — parse transcript, log prompts + changes to activity.md (no auto-commit)
 commands/
-  *.md              — slash commands (some invoke skills, some are self-contained)
-skills/
-  check-in/         — read aggregated notes, recap, todos, profile stamp
-  daily-aggregation/ — git-diff scan, per-person project notes, coordination flags
+  *.md              — slash commands (self-contained instruction files)
 ```
 
 ### Data Flow
 
 ```
+session-end (automatic)
+  writes: team/<you>/activity.md — session logs from work in external repos
+      │
+      ▼
 /aggregate (daily, scheduled)
-  reads: git log + project status.md + kanban.md
+  reads: activity.md logs (primary) + git history + project docs
   writes: ## Team Notes with per-person subsections into each project
       │
       ▼
@@ -53,14 +54,21 @@ skills/
   reads: your @name subsection from each project's Team Notes
   outputs: personalized briefing (last work, priorities, coordination, todos)
   writes: "Last checked in" line in your profile.md
+      │
+      ▼
+/retro (weekly, scheduled)
+  reads: aggregated project status files + activity.md patterns + git stats
+  writes: weekly report with cross-project team analysis
 ```
 
 ## Design Decisions
 
 - **Activity log captures intent** — session-end extracts user prompts from the conversation transcript into activity.md
+- **Activity.md is the primary lens** — aggregate parses session logs to see work in external repos, not just vault edits
 - **Hooks for deterministic work** — pull on start, log on end, commit/push is manual
 - **Metadata injection only** — hooks never inject raw file content into context (prompt injection prevention)
-- **Writer/reader pattern** — aggregate writes notes, check-in reads them (no duplicate analysis)
+- **Writer/reader chain** — session-end → activity.md → aggregate → project files → check-in / retro
+- **Aggregate vs retro** — aggregate is the operational data pipeline (daily, per-project), retro is the strategic synthesis (weekly, cross-project)
 - **Session-end scoped to user** — only commits `team/<you>/`, never other folders
 - **Incremental aggregation** — git-diff change detection, only rebuilds affected projects
 - **task.md is personal** — your own todo list, not a team-managed task system

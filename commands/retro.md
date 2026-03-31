@@ -1,10 +1,10 @@
 ---
-description: "Generate weekly retrospective from git history"
+description: "Generate weekly retrospective — cross-project synthesis for team sync"
 ---
 
 ## When to Use
 
-Run weekly or on-demand. Produces a retrospective based on what actually happened in git.
+Run weekly or on-demand. Produces a strategic retrospective that reads what `/aggregate` has already computed and adds cross-project team-level analysis.
 
 ## Context
 
@@ -16,13 +16,24 @@ Identity and vault path from `<ingram-office-session>` tags. Read `CLAUDE.md` at
 
 ```bash
 git pull
-git log --since="7 days ago" --name-only --pretty=format:"%h|%an|%as|%s" -- team/ projects/
 ```
 
-Also get per-person stats:
+**Primary input — aggregated project files:**
+For each project in `/projects/`, read `status.md` — especially the `## Team Notes` sections written by `/aggregate`. This is the foundation for "What Happened" — don't re-derive what aggregate already computed.
+
+**Activity.md patterns across the team:**
+Read all `team/*/activity.md` files for entries from the past 7 days. Extract cross-person patterns:
+- Session volume per person (how many sessions, total duration)
+- Which repos/projects each person worked in
+- Types of work (debugging, features, docs, architecture, etc.)
+- Context-switching patterns (how many different projects per person)
+
+**Git stats for contributions table:**
 ```bash
 git shortlog --since="7 days ago" --summary --numbered -- team/ projects/
 ```
+
+If a previous retro exists, read it for trend comparison.
 
 ### 2. Generate `/projects/weekly reports/YYYY-WXX.md`
 
@@ -32,31 +43,41 @@ git shortlog --since="7 days ago" --summary --numbered -- team/ projects/
 > Generated: YYYY-MM-DD
 
 ## What Happened
-[Group commits by project folder — what docs were created, updated, or reorganized]
+[Sourced from aggregate's Team Notes — group by project, summarize what each person did]
+[Include both vault doc changes AND external repo work from activity logs]
 
 ### ingram-cloud
-- @PersonA: updated architecture.md, added deployment docs
-- @PersonB: rewrote onboarding.md, updated kanban
+- @PersonA: API refactor (3 sessions), updated architecture.md
+- @PersonB: onboarding rewrite, deployment debugging
 
 ### security
-- @PersonC: added new findings, updated status
+- @PersonC: vulnerability scanner work, added findings docs
 
 ## Contributions
-| Person | Commits | Projects Touched | Key Changes |
-|--------|---------|-----------------|-------------|
-| @PersonA | 12 | ingram-cloud, security | architecture rewrite |
-| @PersonB | 5 | ingram-cloud | onboarding docs |
+| Person | Sessions | Commits | Projects Touched | Key Changes |
+|--------|----------|---------|-----------------|-------------|
+| @PersonA | 8 | 12 | ingram-cloud, security | architecture rewrite |
+| @PersonB | 4 | 5 | ingram-cloud | onboarding docs |
 
-## Coordination That Happened
-[Files edited by 2+ people this week — did they sync or step on each other?]
+## Team Velocity
+- **Total sessions this week**: [N] across [M] projects
+- **Active contributors**: [list]
+- **Momentum**: [trending up/down/stable vs previous week if available]
+- **Projects with most activity**: [ranked]
+- **Projects with no activity**: [list any that went quiet]
 
-## Areas That Need Attention
-- [Projects with no commits in 7+ days]
-- [Large doc changes with no review]
-- [New project folders created this week — team should be aware]
+## Collaboration Health
+- **Working together**: [people who touched the same projects or coordinated]
+- **Working in isolation**: [people only active in one project with no overlap]
+- **Context-switching**: [anyone spread across many projects — might need focus]
+- **Files edited by 2+ people**: [potential coordination needs or conflicts]
 
-## Suggested Topics for Next Week
-[Based on patterns: overlapping work, stalled projects, large pending changes]
+## Strategic Observations
+[Higher-level patterns the team should discuss]
+- [Large architectural changes that affect multiple projects]
+- [Recurring debugging sessions that suggest systemic issues]
+- [New project areas that emerged this week]
+- [Shifts in focus — team pivoting toward/away from certain areas]
 
 ## Discussion Points
 <!-- Manual section — add talking points here, preserved across regenerations -->
@@ -70,7 +91,7 @@ Append to `~/.ingram-office/logs/retro.log`:
   period: 2026-03-23 to 2026-03-30 | week: W13
   contributors: [personA, personB, personC]
   projects_touched: [ingram-cloud, security]
-  total_commits: 17 | errors: none | commit: abc1234
+  total_sessions: 12 | total_commits: 17 | errors: none | commit: abc1234
 ---
 ```
 
@@ -84,7 +105,9 @@ git push
 ## Guardrails
 
 - Read-only on team folders
-- **Git history is the only data source** — no activity.md, no task parsing
+- **Reads aggregate output as primary source** — don't duplicate aggregate's per-project analysis
+- **Activity.md for cross-team patterns** — session volume, work types, context-switching
+- **Git history for stats only** — contribution counts, not re-deriving what happened
 - Preserve `## Discussion Points` manual content
 - Compare to previous retro for trend spotting
 - No value judgments — present what happened, let the team discuss

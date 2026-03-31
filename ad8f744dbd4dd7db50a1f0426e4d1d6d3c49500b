@@ -1,0 +1,46 @@
+README.md
+  d3cabc42183ac030 27-28,38,44-47,49,57-61,67,70-71
+commands/retro.md
+  d3cabc42183ac030 2,7,21-31,36,46-47,50-51,54,57-73,75-80,94,108-110
+commands/check-in.md
+  d3cabc42183ac030 2,5-76
+commands/aggregate.md
+  d3cabc42183ac030 2,6-167
+.claude-plugin/marketplace.json
+  d3cabc42183ac030 3,10
+.claude-plugin/plugin.json
+  d3cabc42183ac030 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.22",
+  "base_commit_sha": "ad8f744dbd4dd7db50a1f0426e4d1d6d3c49500b",
+  "prompts": {
+    "2f99e14c0e29a381": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "87649ef9-1fe8-4129-aa1e-e8a300909ef8",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "hurleveur <belliorum@gmail.com>",
+      "messages": [],
+      "total_additions": 312,
+      "total_deletions": 140,
+      "accepted_lines": 232,
+      "overriden_lines": 0
+    },
+    "d3cabc42183ac030": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3a501680-25d3-4700-bae5-c6bc23429f07",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "hurleveur <belliorum@gmail.com>",
+      "messages": [],
+      "total_additions": 303,
+      "total_deletions": 40,
+      "accepted_lines": 302,
+      "overriden_lines": 0
+    }
+  }
+}

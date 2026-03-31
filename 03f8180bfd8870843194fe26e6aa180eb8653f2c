@@ -1,0 +1,40 @@
+.claude-plugin/plugin.json
+  965bc0deba0aedec 3
+commands/setup-identity.md
+  965bc0deba0aedec 2-3,8-9,16-18,60-64,66
+commands/check-in.md
+  965bc0deba0aedec 2,7,15,17-33,36,39,41,48,50,52,54,56-66,71-75,78,82,94,100,109,111
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.22",
+  "base_commit_sha": "03f8180bfd8870843194fe26e6aa180eb8653f2c",
+  "prompts": {
+    "2f99e14c0e29a381": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "87649ef9-1fe8-4129-aa1e-e8a300909ef8",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "hurleveur <belliorum@gmail.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 227,
+      "overriden_lines": 0
+    },
+    "965bc0deba0aedec": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c89c0f69-abf5-4092-afa7-1aaa8a60feae",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "hurleveur <belliorum@gmail.com>",
+      "messages": [],
+      "total_additions": 68,
+      "total_deletions": 27,
+      "accepted_lines": 68,
+      "overriden_lines": 0
+    }
+  }
+}

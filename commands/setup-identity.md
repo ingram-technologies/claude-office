@@ -1,9 +1,11 @@
 ---
-description: "First-time setup — configure identity, fill out your profile, and learn how the plugin works"
-argument-hint: "[your-name] [vault-path]"
+description: "First-time setup — configure your identity, fill out your profile, and learn how the plugin works. Usage: /setup-identity <your-name> <vault-path>"
+argument-hint: "<your-name> <vault-path>"
 ---
 
 This is the onboarding command. It sets up identity, fills out the user's profile, and explains the plugin.
+
+**Example:** `/setup-identity alex C:/Users/alex/Documents/ingram-vault`
 
 **Key principle:** Write to profile.md progressively — after each section is collected, write it immediately. Don't batch everything at the end. This way if the conversation is interrupted, partial progress is saved.
 
@@ -11,7 +13,9 @@ This is the onboarding command. It sets up identity, fills out the user's profil
 
 If arguments are provided, parse as `<name>` and `<vault-path>`. Otherwise ask:
 - "What's your name?" (must match their folder name in `/team/<name>/`, lowercase)
-- "Where is your Ingram Office vault?" (absolute path, e.g., `C:/Users/alex/Documents/ingram obsidian vault`)
+- "Where is your Ingram Office vault?" (absolute path, e.g., `C:/Users/alex/Documents/ingram-vault`)
+
+**The vault is a separate GitHub repository** (not part of this plugin). It's an Obsidian vault where the team keeps docs, project statuses, and coordination files. It should already contain `CLAUDE.md`, a `/team/` folder, and a `/team/_new_user/` template. If you don't have the vault yet, clone it first and then come back.
 
 Create `~/.ingram-office/` and `~/.ingram-office/logs/` if they don't exist.
 
@@ -53,13 +57,13 @@ Auto-detect OS, shell, and MCP servers. Ask about:
 → **Write to profile.md** (full Environment section)
 
 ### 2c. Security
-These questions come from our [security guidelines](/projects/security/status.md). Keep it light — just the essentials:
-- Is your disk encrypted? (BitLocker / FileVault)
-- Do you use 1Password? (team default)
-- Is MFA enabled on your work accounts?
-- Do you use a VPN?
+Read the security section template from the user's `profile.md` (copied from `_new_user/`). The template defines what fields need filling — don't hardcode questions here, just walk through whatever the template asks for.
 
-→ **Write to profile.md** (Security section)
+Mention: "If you'd rather fill out the security section manually later, just say 'skip' and you can edit `team/<name>/profile.md` directly anytime."
+
+If they choose to fill it now, walk through each field in the template and write answers as you go.
+
+→ **Write to profile.md** (Security section — or mark as skipped)
 
 ### 2d. Contact & Project
 - How to reach them (Slack, email)

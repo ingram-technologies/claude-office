@@ -1,6 +1,6 @@
 {
   "name": "ingram-office",
-  "description": "Ingram Office vault plugin: activity tracking, aggregation, retrospectives",
+  "description": "Ingram Office vault plugin: activity tracking, aggregation, and retrospectives. Flow: /setup-identity (once) → sessions auto-log to activity.md → /aggregate builds project status → /check-in gives you a personal briefing → /retro for weekly synthesis.",
   "version": "1.0.0",
   "author": {
     "name": "Ingram"

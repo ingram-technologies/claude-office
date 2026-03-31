@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 # Stop hook for ingram-office plugin
-# Reads conversation transcript, logs prompts + changes to activity.md, commits locally
+# Extracts session overview from transcript, logs to activity.md
+# Does NOT commit — obsidian-git handles that automatically
 
 set -euo pipefail
 
 IDENTITY_FILE="$HOME/.ingram-office/identity.json"
+STATE_FILE="$HOME/.ingram-office/last-session-state.json"
 
 [ ! -f "$IDENTITY_FILE" ] && exit 0
 
@@ -20,82 +22,252 @@ VAULT=$(parse_json "$IDENTITY_FILE" "vault")
 
 [ -z "$NAME" ] || [ -z "$VAULT" ] || [ ! -d "$VAULT" ] && exit 0
 
-# Read Stop hook stdin for transcript_path
+activity_file="$VAULT/team/$NAME/activity.md"
+[ ! -f "$activity_file" ] && exit 0
+
+# Read Stop hook stdin for session info
 hook_input=$(cat)
 transcript_path=""
+session_id=""
 if [ -n "$hook_input" ]; then
-  transcript_path=$(echo "$hook_input" | node -e "
+  eval "$(echo "$hook_input" | node -e "
     let d=''; process.stdin.on('data',c=>d+=c); process.stdin.on('end',()=>{
-      try { console.log(JSON.parse(d).transcript_path||''); } catch(e) { console.log(''); }
+      try {
+        const o=JSON.parse(d);
+        const tp=o.transcript_path||'';
+        const si=o.session_id||'';
+        console.log('transcript_path=\"'+tp.replace(/\"/g,'')+'\"');
+        console.log('session_id=\"'+si.replace(/\"/g,'')+'\"');
+      } catch(e) {
+        console.log('transcript_path=\"\"');
+        console.log('session_id=\"\"');
+      }
     });
-  " 2>/dev/null || echo "")
+  " 2>/dev/null || echo 'transcript_path=""; session_id=""')"
 fi
 
-# Extract user prompts from transcript JSONL
-prompts=""
+# Load previous state to avoid duplicate writes
+prev_session=""
+prev_msg_count=0
+if [ -f "$STATE_FILE" ]; then
+  prev_session=$(parse_json "$STATE_FILE" "session_id")
+  prev_msg_count=$(parse_json "$STATE_FILE" "msg_count")
+  [ -z "$prev_msg_count" ] && prev_msg_count=0
+fi
+
+# Extract session overview from transcript
+overview=""
 if [ -n "$transcript_path" ] && [ -f "$transcript_path" ]; then
-  prompts=$(node -e "
-    const fs=require('fs'), lines=fs.readFileSync('$transcript_path','utf8').trim().split('\n');
-    const msgs=[];
-    for(const l of lines){
+  overview=$(node -e "
+    const fs=require('fs');
+    const lines=fs.readFileSync(process.argv[1],'utf8').trim().split('\n');
+    const prevSession=process.argv[2]||'';
+    const prevCount=parseInt(process.argv[3]||'0',10);
+    const curSession=process.argv[4]||'';
+
+    // Same session as last write? Only process new messages
+    const sameSession=(prevSession===curSession && curSession!=='');
+    const startIdx=sameSession?prevCount:0;
+
+    const prompts=[];
+    const tools={};
+    const editedFiles=new Set();
+    let tokensIn=0, tokensOut=0;
+    let firstTs='', lastTs='';
+    let branch='';
+    let repo='';
+    let entrypoint='';
+    let totalMsgs=0;
+
+    for(let i=0;i<lines.length;i++){
       try{
-        const o=JSON.parse(l);
-        if(o.type==='human'||o.role==='user'){
-          let txt=typeof o.content==='string'?o.content:'';
-          if(Array.isArray(o.content)) txt=o.content.filter(b=>b.type==='text').map(b=>b.text).join(' ');
-          txt=txt.replace(/\\n/g,' ').trim();
-          if(txt && txt.length>0 && txt.length<500) msgs.push(txt);
+        const o=JSON.parse(lines[i]);
+
+        // Track timestamps for duration
+        if(o.timestamp){
+          if(!firstTs) firstTs=o.timestamp;
+          lastTs=o.timestamp;
+        }
+
+        // Grab metadata from any message that has it
+        if(o.gitBranch && !branch) branch=o.gitBranch;
+        if(o.cwd && !repo) repo=o.cwd.replace(/\\\\/g,'/').split('/').pop();
+        if(o.entrypoint && !entrypoint) entrypoint=o.entrypoint;
+
+        // Only extract content from new messages (after previous write point)
+        if(i<startIdx) continue;
+
+        if(o.type==='user' && o.message){
+          totalMsgs++;
+          const mc=o.message.content;
+          let txt=typeof mc==='string'?mc:'';
+          if(Array.isArray(mc)) txt=mc.filter(b=>b.type==='text').map(b=>b.text).join(' ');
+          txt=txt.replace(/[\n\r]/g,' ').trim();
+          if(txt && txt.length>2 && txt.length<500 && !txt.startsWith('<')) prompts.push(txt);
+        }
+
+        if(o.type==='assistant' && o.message){
+          const u=o.message.usage;
+          if(u){ tokensIn+=(u.input_tokens||0); tokensOut+=(u.output_tokens||0); }
+          if(Array.isArray(o.message.content)){
+            for(const b of o.message.content){
+              if(b.type==='tool_use'){
+                tools[b.name]=(tools[b.name]||0)+1;
+                // Extract file paths from Edit/Write/Read tool calls
+                const inp=b.input||{};
+                const fp=inp.file_path||inp.path||'';
+                if(fp && (b.name==='Edit'||b.name==='Write'||b.name==='MultiEdit')){
+                  // Extract basename
+                  const base=fp.replace(/\\\\/g,'/').split('/').pop();
+                  if(base && base!=='activity.md') editedFiles.add(base);
+                }
+              }
+            }
+          }
         }
       }catch(e){}
     }
-    // Deduplicate and take up to 10 prompts
+
+    // No new user messages since last write? Skip
+    if(totalMsgs===0){
+      console.log('__SKIP__');
+      process.exit(0);
+    }
+
+    // Save state for next invocation
+    const state=JSON.stringify({session_id:curSession,msg_count:lines.length});
+    fs.writeFileSync(process.argv[5],state);
+
+    // Calculate duration
+    let duration='';
+    if(firstTs && lastTs){
+      const ms=new Date(lastTs)-new Date(firstTs);
+      const mins=Math.round(ms/60000);
+      if(mins>=1) duration=mins+'min';
+    }
+
+    // Deduplicate prompts
     const seen=new Set(); const unique=[];
-    for(const m of msgs){ if(!seen.has(m)){seen.add(m);unique.push(m);} }
-    unique.slice(0,10).forEach(m=>console.log('  - '+m));
-  " 2>/dev/null || echo "")
+    for(const m of prompts){ if(!seen.has(m)){seen.add(m);unique.push(m);} }
+
+    // Build tool summary with × symbol
+    const toolSummary=Object.entries(tools)
+      .sort((a,b)=>b[1]-a[1])
+      .map(([n,c])=>n+(c>1?'\u00d7'+c:''))
+      .join(', ');
+
+    // Topic is the first prompt, untruncated
+    let topic=unique[0]||'';
+
+    // Build file list from tool_use data (files actually edited in session)
+    const sessionFiles=[...editedFiles].sort().slice(0,10);
+    const sessionFileStr=sessionFiles.join(', ');
+    if(editedFiles.size>10) sessionFileStr+=' (+'+(editedFiles.size-10)+' more)';
+
+    // Output structured lines
+    if(duration) console.log('DURATION::'+duration);
+    if(repo) console.log('REPO::'+repo);
+    if(branch) console.log('BRANCH::'+branch);
+    if(entrypoint) console.log('ENTRYPOINT::'+entrypoint);
+    if(topic) console.log('TOPIC::'+topic);
+    if(unique.length>0) console.log('PROMPTS::'+unique.length);
+    // Skip first prompt in list since it's already the topic
+    unique.slice(1,11).forEach(m=>console.log('PROMPT::'+m));
+    if(toolSummary) console.log('TOOLS::'+toolSummary);
+    if(tokensOut>0) console.log('TOKENS::'+tokensIn+'in/'+tokensOut+'out');
+    if(sessionFileStr) console.log('SESSION_FILES::'+sessionFileStr);
+  " "$transcript_path" "$prev_session" "$prev_msg_count" "$session_id" "$STATE_FILE" 2>/dev/null || echo "")
 fi
+
+# Check if we should skip (no new messages)
+if [ "$overview" = "__SKIP__" ] || [ -z "$overview" ]; then
+  exit 0
+fi
+
+# Parse structured output
+duration=$(echo "$overview" | grep '^DURATION::' | head -1 | sed 's/^DURATION:://' || true)
+repo=$(echo "$overview" | grep '^REPO::' | head -1 | sed 's/^REPO:://' || true)
+branch=$(echo "$overview" | grep '^BRANCH::' | head -1 | sed 's/^BRANCH:://' || true)
+entrypoint=$(echo "$overview" | grep '^ENTRYPOINT::' | head -1 | sed 's/^ENTRYPOINT:://' || true)
+topic=$(echo "$overview" | grep '^TOPIC::' | head -1 | sed 's/^TOPIC:://' || true)
+prompt_count=$(echo "$overview" | grep '^PROMPTS::' | head -1 | sed 's/^PROMPTS:://' || true)
+tool_summary=$(echo "$overview" | grep '^TOOLS::' | head -1 | sed 's/^TOOLS:://' || true)
+tokens=$(echo "$overview" | grep '^TOKENS::' | head -1 | sed 's/^TOKENS:://' || true)
+session_files=$(echo "$overview" | grep '^SESSION_FILES::' | head -1 | sed 's/^SESSION_FILES:://' || true)
 
 cd "$VAULT" || exit 0
 
-# Collect what changed (unstaged + staged, excluding activity.md itself)
-changed_files=$(git diff --name-only HEAD 2>/dev/null | grep -v "activity.md" || true)
-untracked=$(git ls-files --others --exclude-standard 2>/dev/null | grep -v "activity.md" || true)
-all_changes="$changed_files"
-[ -n "$untracked" ] && all_changes="$all_changes
-$untracked"
+# Also check git for uncommitted changes (complementary to transcript-based files)
+changed_files=$(git diff --name-only HEAD 2>/dev/null | grep -v "activity\.md" || true)
+untracked=$(git ls-files --others --exclude-standard 2>/dev/null | grep -v "activity\.md" || true)
+all_changes=""
+[ -n "$changed_files" ] && all_changes="$changed_files"
+if [ -n "$untracked" ]; then
+  [ -n "$all_changes" ] && all_changes="$all_changes
+$untracked" || all_changes="$untracked"
+fi
 
-# Only log if there were actual doc changes or prompts to record
-if [ -n "$all_changes" ] || [ -n "$prompts" ]; then
-  activity_file="$VAULT/team/$NAME/activity.md"
+# Extract project folders from changed paths
+projects=""
+if [ -n "$all_changes" ]; then
+  projects=$(echo "$all_changes" | grep -oE 'projects/[^/]+' | sort -u | sed 's|projects/||' | tr '\n' ', ' | sed 's/,$//' || true)
+fi
 
-  if [ -f "$activity_file" ]; then
-    timestamp=$(date +"%Y-%m-%d %H:%M")
+# Git-based file list (uncommitted changes)
+git_file_list=""
+if [ -n "$all_changes" ]; then
+  git_file_list=$(echo "$all_changes" | sed 's|.*/||' | sort -u | head -10 | tr '\n' ', ' | sed 's/,$//' || true)
+fi
 
-    # Extract project folders from changed paths
-    projects=$(echo "$all_changes" | grep -oE 'projects/[^/]+' | sort -u | sed 's|projects/||' | tr '\n' ', ' | sed 's/,$//' || true)
-
-    # Build concise file list (deduplicated basenames, max 10)
-    total_files=0
-    file_list=""
-    if [ -n "$all_changes" ]; then
-      total_files=$(echo "$all_changes" | wc -l | tr -d ' ')
-      file_list=$(echo "$all_changes" | sed 's|.*/||' | sort -u | head -10 | tr '\n' ', ' | sed 's/,$//' || true)
-      unique_count=$(echo "$all_changes" | sed 's|.*/||' | sort -u | wc -l | tr -d ' ')
-      [ "$unique_count" -gt 10 ] && file_list="$file_list (+$((unique_count - 10)) more)"
-    fi
-
-    # Append entry
-    {
-      echo ""
-      echo "## $timestamp"
-      if [ -n "$prompts" ]; then
-        echo "- Prompts:"
-        echo "$prompts"
-      fi
-      [ -n "$file_list" ] && echo "- Files touched: $file_list ($total_files changes)"
-      [ -n "$projects" ] && echo "- Projects: $projects"
-    } >> "$activity_file"
+# Merge file lists: session transcript files + git uncommitted files
+file_list="$session_files"
+if [ -n "$git_file_list" ]; then
+  if [ -n "$file_list" ]; then
+    file_list="$file_list, $git_file_list"
+  else
+    file_list="$git_file_list"
   fi
 fi
+
+timestamp=$(date +"%Y-%m-%d %H:%M")
+
+# Short session ID (first 8 chars)
+short_id=""
+[ -n "$session_id" ] && short_id=$(echo "$session_id" | cut -c1-8)
+
+# Build the activity entry
+{
+  echo ""
+
+  # Header: ## timestamp (duration) — repo:name branch:main session:id via:cli
+  header="## $timestamp"
+  [ -n "$duration" ] && header="$header ($duration)"
+  meta=""
+  [ -n "$repo" ] && meta="repo:$repo"
+  [ -n "$branch" ] && meta="${meta:+$meta }branch:$branch"
+  [ -n "$short_id" ] && meta="${meta:+$meta }session:$short_id"
+  [ -n "$entrypoint" ] && meta="${meta:+$meta }via:$entrypoint"
+  [ -n "$meta" ] && header="$header — $meta"
+  echo "$header"
+
+  # Topic line
+  [ -n "$topic" ] && echo "- **$topic**"
+
+  # Prompts (skip first since it's the topic)
+  if [ -n "$prompt_count" ] && [ "$prompt_count" -gt 1 ]; then
+    echo "- Prompts ($prompt_count):"
+    echo "$overview" | grep '^PROMPT::' | head -10 | sed 's/^PROMPT::/  - /'
+  fi
+
+  # Tools + tokens on one line
+  stats=""
+  [ -n "$tool_summary" ] && stats="Tools: $tool_summary"
+  [ -n "$tokens" ] && stats="${stats:+$stats | }Tokens: $tokens"
+  [ -n "$stats" ] && echo "- $stats"
+
+  # Files
+  [ -n "$file_list" ] && echo "- Files: $file_list"
+  [ -n "$projects" ] && echo "- Projects: $projects"
+} >> "$activity_file"
 
 exit 0

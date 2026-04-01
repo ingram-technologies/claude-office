@@ -44,7 +44,8 @@ else
     summary="<ingram-office-session identity=\"$NAME\" vault=\"$VAULT\">"
     summary="$summary\nYou are working as **$NAME** in the Ingram Office vault at \`$VAULT\`."
     summary="$summary\nThis vault is a central documentation hub. Task tracking happens in GitHub."
-    summary="$summary\nAvailable commands: /check-in, /aggregate, /retro, /setup-identity"
+    summary="$summary\nAvailable commands: /check-in, /aggregate, /retro, /setup-identity, /import-activity"
+    summary="$summary\n**Vault awareness**: Use the \`vault-awareness\` skill to understand the vault structure and find relevant docs."
 
     [ "$task_count" -gt 0 ] && summary="$summary\n- **$task_count open todo(s)** in your task.md"
     [ "$others_changed" -gt 0 ] && summary="$summary\n- **Docs changed in last 24h** — run /check-in for details"

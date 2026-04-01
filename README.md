@@ -6,9 +6,11 @@ Task tracking happens in GitHub. This plugin handles doc sync, change visibility
 
 ## Setup
 
-1. Install the plugin in Claude Code
-2. Run `/setup-identity your-name /path/to/vault`
-3. Restart your session — hooks activate automatically
+1. Install the plugin in Claude Code by running `/plugin marketplace add ./path/to/ingram-office-plugin`, then run `/plugin` → go to **Discover** → install **ingram-office**
+2. Run `/setup-identity your-name /path/to/vault` (vault located at at https://github.com/ingram-technologies/ingram-obsidian-vault)
+3. Restart your session — hooks activate automatically and store what you do in activity.md
+4. You can use /check-in to get context on your projects, and /import-activity to add past activity to the activity.md in a selective way
+5. Use /aggregate for daily aggregation (works since the last time it ran) and /retro to update the documentation to match
 
 ## What Happens Automatically
 

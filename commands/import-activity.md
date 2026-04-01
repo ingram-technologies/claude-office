@@ -17,7 +17,7 @@ Identity and vault path from `<ingram-office-session>` tags.
 /import-activity                              # Interactive — show all projects, let me pick
 /import-activity ingram-cloud                 # Show sessions from ingram-cloud only
 /import-activity --since 2026-03-25           # Everything since March 25
-/import-activity --all                        # Import all unlogged sessions (full detail)
+/import-activity --all                        # Import all unlogged sessions (full detail, no truncation, no confirmation)
 /import-activity ingram-cloud --minimal       # Just prompts, no tools/tokens
 /import-activity --all --with-responses       # Full detail including AI responses
 /import-activity cyberspace --prompts-only    # Just the session header + every prompt
@@ -270,7 +270,11 @@ Before writing, ask what level of detail the user wants:
 | **with-responses** | Everything in full + AI response text (can be very large) |
 | **custom** | Pick and choose: prompts? responses? tools? tokens? files? |
 
-If the user specified a level flag in their invocation, skip this step.
+If the user specified a level flag in their invocation, skip this step and use the indicated level:
+- `--all` → **full** (all prompts untruncated + tools + tokens + files)
+- `--minimal` → **minimal**
+- `--prompts-only` → **prompts-only**
+- `--with-responses` → **with-responses**
 
 **When `--with-responses` is used:** warn the user that this generates a lot of text and suggest they review and process the imported data afterward:
 
@@ -282,49 +286,82 @@ For each selected session, write an entry to the appropriate activity file (see 
 
 **CRITICAL: Never truncate prompts.** Do NOT abbreviate, summarize, add "...", or shorten any prompt text. Every prompt must appear exactly as the user typed it, character for character, no matter how long. This is a logging tool — fidelity is the entire point.
 
-**How to write entries without truncation:** Do NOT type out prompt text manually in your response. Instead, use Bash to construct the full entry from the JSON data the scanner already extracted, then append it to the file. This avoids any accidental summarization. Example approach:
+**MANDATORY: Use a single Bash+node script to format AND write all entries directly to the file.** Do NOT:
+- Type out or paraphrase prompt text in your response
+- Build a formatting script from scratch — use the one below
+- Add any length caps, substring calls, or "..." truncation to prompts
+
+The scanner in step 1 already extracted full prompt text into JSON. The formatter below reads that JSON and writes entries. **Use this script, do not improvise your own:**
 
 ```bash
-# After running the scanner and capturing output to a variable/file,
-# use node to format the entry and append it directly:
+# ── Entry formatter — reads scanner JSON (one object per line) from stdin,
+# writes formatted markdown entries to $ACTIVITY_FILE ──
+# Pipe the scanner output into this, or cat a saved file into it.
+
 node -e "
-  const session = JSON.parse(process.argv[1]);
-  const lines = [];
-  const date = new Date(session.first_ts);
-  const ts = date.toISOString().slice(0,16).replace('T',' ');
-  let header = '## ' + ts + ' (' + session.duration_min + 'min)';
-  header += ' — repo:' + session.repo + ' branch:' + session.branch;
-  header += ' session:' + session.session_id.slice(0,8);
-  if (session.entrypoint) header += ' via:' + session.entrypoint;
-  lines.push('', header);
+  const fs = require('fs');
+  const input = fs.readFileSync(0, 'utf8').trim().split('\n');
+  const loggedRaw = (process.argv[2] || '').split(',').filter(Boolean);
+  const logged = new Set(loggedRaw);
 
-  // First prompt as topic — FULL TEXT, no truncation
-  if (session.prompts.length > 0) {
-    lines.push('- **' + session.prompts[0].replace(/\*/g, '') + '**');
+  const sessions = [];
+  for (const line of input) {
+    try {
+      const s = JSON.parse(line);
+      if (s.msg_count <= 2 && !s.tools && s.prompts.length === 0) continue;
+      if (logged.has(s.session_id.substring(0, 8))) continue;
+      sessions.push(s);
+    } catch(e) {}
   }
+  sessions.sort((a,b) => new Date(a.first_ts) - new Date(b.first_ts));
 
-  // All remaining prompts — FULL TEXT, no truncation
-  if (session.prompts.length > 1) {
-    lines.push('- Prompts:');
-    for (let i = 1; i < session.prompts.length; i++) {
-      lines.push('  - ' + session.prompts[i]);
+  const out = [];
+  for (const s of sessions) {
+    const d = new Date(s.first_ts);
+    const date = d.toISOString().slice(0,10);
+    const time = d.toISOString().slice(11,16);
+    const dur = s.duration_min;
+    const repo = s.repo || 'unknown';
+
+    let header = '## ' + date + ' ' + time;
+    if (dur > 0) header += ' (' + dur + 'min)';
+    header += ' — repo:' + repo;
+    if (s.branch && s.branch !== 'HEAD') header += ' branch:' + s.branch;
+    header += ' session:' + s.session_id.substring(0, 8);
+    if (s.entrypoint) header += ' via:' + s.entrypoint;
+    out.push(header);
+
+    // First prompt as bold topic — FULL TEXT, no truncation ever
+    if (s.prompts.length > 0) {
+      out.push('- **' + s.prompts[0].replace(/\*/g, '') + '**');
     }
+
+    // Remaining prompts — FULL TEXT, no truncation ever
+    if (s.prompts.length > 1) {
+      out.push('- Prompts (' + s.prompts.length + '):');
+      for (let i = 1; i < s.prompts.length; i++) {
+        out.push('  - ' + s.prompts[i].replace(/\*/g, ''));
+      }
+    }
+
+    // Tools + tokens on one line
+    const stats = [];
+    if (s.tools) stats.push('Tools: ' + s.tools);
+    if (s.tokens) stats.push('Tokens: ' + s.tokens);
+    if (stats.length) out.push('- ' + stats.join(' | '));
+
+    // Files
+    if (s.files) out.push('- Files: ' + s.files);
+
+    out.push('');  // blank line between entries
   }
 
-  // Tools + tokens
-  const stats = [];
-  if (session.tools) stats.push('Tools: ' + session.tools);
-  if (session.tokens) stats.push('Tokens: ' + session.tokens);
-  if (stats.length) lines.push('- ' + stats.join(' | '));
-
-  // Files
-  if (session.files) lines.push('- Files: ' + session.files);
-
-  console.log(lines.join('\n'));
-" '\$SESSION_JSON' >> \"\$activity_file\"
+  fs.appendFileSync(process.argv[1], '\n' + out.join('\n'));
+  console.error('Wrote ' + sessions.length + ' entries');
+" "\$ACTIVITY_FILE" "\$LOGGED_IDS" < "\$SCANNER_OUTPUT"
 ```
 
-For large imports (many sessions), batch them into a single Bash call that loops through all selected sessions and appends each formatted entry.
+**Usage:** after running the scanner and saving output to `$SCANNER_OUTPUT`, and after grepping existing session IDs into a comma-separated `$LOGGED_IDS` string, pipe into this formatter. It handles dedup, sorting, and writing in one shot.
 
 **When `--with-responses` is used**, the format changes to show prompt/response pairs:
 

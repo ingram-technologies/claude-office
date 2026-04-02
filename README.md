@@ -6,11 +6,12 @@ Task tracking happens in GitHub. This plugin handles doc sync, change visibility
 
 ## Setup
 
-1. Install the plugin in Claude Code by running `/plugin marketplace add ./path/to/ingram-office-plugin`, or `/plugin marketplace add ingram-technologies@claude-office` (TBD) then run `/plugin` → go to **Discover** → install **ingram-office**
-2. Run `/setup-identity your-name /path/to/vault` (vault located at at https://github.com/ingram-technologies/ingram-obsidian-vault)
-3. Restart your session — hooks activate automatically and store what you do in activity.md
-4. You can use /check-in to get context on your projects, and /import-activity to add past activity to the activity.md in a selective way
-5. Use /aggregate for daily aggregation (works since the last time it ran) and /retro to update the documentation to match
+1. To install the plugin in Claude Code, either use `/plugin marketplace add ingram-technologies@claude-office` or download the repo and run `/plugin marketplace add ./path/to/ingram-office-plugin`, then `/plugin` → go to **Discover** → install **ingram-office** (we recommend activating it for specific repositories instead of account wide)
+2. Fork the vault template from https://github.com/ingram-technologies/claude-office-vault (you probably want to make your repo private)
+3. Run `/setup-identity your-name /path/to/vault` to do the one time setup of which team member you are and where the vault is located
+4. Either run `/reload-plugins` or restart your session — hooks activate automatically and store what you do in activity.md when the plugin is active 
+5. You can use `/check-in` to get context on your projects, and `/import-activity` to add past activity to the activity.md in a selective way
+6. Use `/aggregate` for daily aggregation (works since the last time it ran) and `/retro` to update the documentation to match
 
 ## What Happens Automatically
 
@@ -29,6 +30,7 @@ Hooks are shell scripts — deterministic, no context waste. They inject metadat
 | `/aggregate` | Parse activity.md logs + git diffs, write per-person Team Notes into each project's status.md (daily scheduled) |
 | `/retro` | Weekly cross-project synthesis — team velocity, collaboration health, strategic observations (weekly scheduled) |
 | `/setup-identity` | Configure your name and vault path (run once) |
+| `/import-activity` | Import previous activity on various projects, you can either enter the command without arguments to see your options or specify |
 
 ## Architecture
 

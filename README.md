@@ -6,7 +6,7 @@ Task tracking happens in GitHub. This plugin handles doc sync, change visibility
 
 ## Setup
 
-1. To install the plugin in Claude Code, either use `/plugin marketplace add ingram-technologies@claude-office` or download the repo and run `/plugin marketplace add ./path/to/ingram-office-plugin`, then `/plugin` → go to **Discover** → install **ingram-office** (we recommend activating it for specific repositories instead of account wide)
+1. To install the plugin in Claude Code, run `/plugin marketplace add ingram-technologies/claude-office` then `/plugin install ingram-technologies@claude-office` (we recommend activating it for specific repositories instead of account wide)
 2. Fork the vault template from https://github.com/ingram-technologies/claude-office-vault (you probably want to make your repo private)
 3. Run `/setup-identity your-name /path/to/vault` to do the one time setup of which team member you are and where the vault is located
 4. Either run `/reload-plugins` or restart your session — hooks activate automatically and store what you do in activity.md when the plugin is active 

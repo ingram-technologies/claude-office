@@ -1,0 +1,23 @@
+commands/document.md
+  f60962f2b78cf726 1-507
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.5",
+  "base_commit_sha": "de0b8e079ac4797842ecdf07b2d6a63d88a7ad2c",
+  "prompts": {
+    "f60962f2b78cf726": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6643c2e2-cca1-4de1-b6d2-45a5c0cf8c79",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "hurleveur",
+      "messages": [],
+      "total_additions": 1431,
+      "total_deletions": 0,
+      "accepted_lines": 1431,
+      "overriden_lines": 0
+    }
+  }
+}

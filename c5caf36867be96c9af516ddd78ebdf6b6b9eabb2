@@ -1,0 +1,36 @@
+commands/document.md
+  6ab43b8cb0b27b37 52-53,85-86,300-302,312,337-339,348,513-514
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.5",
+  "base_commit_sha": "c5caf36867be96c9af516ddd78ebdf6b6b9eabb2",
+  "prompts": {
+    "6ab43b8cb0b27b37": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3c155d03-01f8-4103-8899-246097e1f768",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "hurleveur",
+      "messages": [],
+      "total_additions": 14,
+      "total_deletions": 4,
+      "accepted_lines": 14,
+      "overriden_lines": 0
+    },
+    "f60962f2b78cf726": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6643c2e2-cca1-4de1-b6d2-45a5c0cf8c79",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "hurleveur",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 924,
+      "overriden_lines": 0
+    }
+  }
+}

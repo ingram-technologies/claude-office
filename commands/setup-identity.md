@@ -29,6 +29,8 @@ Write `~/.ingram-office/identity.json`:
 
 Verify the vault path exists and contains `CLAUDE.md`. Verify `/team/<name>/` exists. If not, offer to create it from `/team/_new_user/` — copy the folder, replace all `<PUT YOUR NAME HERE>` placeholders with their name.
 
+Make sure the hooks are allowed with chmod if on mac/linux.
+
 ## Step 2: Fill Out Profile (Progressive)
 
 Read `/team/<name>/profile.md`. Walk the user through each section below. **After each section, write the answers into profile.md immediately** before moving to the next section.

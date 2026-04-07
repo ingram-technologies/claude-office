@@ -264,6 +264,7 @@ Before writing, ask what level of detail the user wants:
 | Level | What's included |
 |---|---|
 | **full** (default) | Header + all prompts (complete text) + tools + tokens + files + projects |
+| **extra** | Everything in full + AI replies as well |
 | **standard** | Header + first prompt as topic + tools + tokens + files (no full prompt list) |
 | **minimal** | Header + first prompt as topic only |
 | **prompts-only** | Header + every prompt (complete text), nothing else |
@@ -283,6 +284,8 @@ If the user specified a level flag in their invocation, skip this step and use t
 ### 4. Write Entries
 
 For each selected session, write an entry to the appropriate activity file (see Output File Routing above).
+
+You don't need to use this script initially, you can simply read the files, only use the script to extract session informations, and avoid overly using it.
 
 **CRITICAL: Never truncate prompts.** Do NOT abbreviate, summarize, add "...", or shorten any prompt text. Every prompt must appear exactly as the user typed it, character for character, no matter how long. This is a logging tool — fidelity is the entire point.
 

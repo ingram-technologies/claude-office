@@ -104,8 +104,9 @@ Note what exists — these will be read in Phase 2.
 ## Checkpoint
 
 Before generating anything, present a summary and proposed plan. This is the only moment the user can redirect the output.
+Look at the existing information and see what files you can create from this information based on the /new_project template (read the template before deciding and presenting the results).
 
-### Format your message exactly like this:
+### Format your message in a similar way, but DO NOT copy this directly:
 
 ---
 **Project:** `<PROJECT_NAME>` (`<primary language>`)

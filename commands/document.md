@@ -406,12 +406,12 @@ Produce a complete, valid HTML file using this structure — replace all placeho
     .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
     .dir { font-weight: 600; color: #ccc; margin-top: 14px; margin-bottom: 2px; font-size: 0.85rem; }
     .dir:first-child { margin-top: 0; }
-    .file { display: flex; align-items: center; gap: 8px; padding: 3px 0 3px 16px; font-size: 0.82rem; cursor: default; position: relative; }
+    .file { display: flex; align-items: center; gap: 8px; padding: 3px 0 3px 16px; font-size: 0.82rem; cursor: default; position: relative; width: 100%; }
     .file:hover { background: rgba(255,255,255,0.04); border-radius: 4px; }
     .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-    .fname { flex: 1; }
-    .badge { font-size: 0.7rem; color: #888; }
-    .tooltip { display: none; position: absolute; left: calc(100% + 12px); top: 50%; transform: translateY(-50%); background: #2a2a3e; border: 1px solid #444; border-radius: 6px; padding: 8px 12px; font-size: 0.78rem; color: #ddd; width: 260px; z-index: 10; line-height: 1.5; box-shadow: 0 4px 12px rgba(0,0,0,0.4); pointer-events: none; }
+    .fname { flex: 0 0 33%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .badge { font-size: 0.7rem; color: #888; flex-shrink: 0; }
+    .tooltip { display: none; position: absolute; left: 33%; top: 50%; transform: translateY(-50%); width: 60%; background: #2a2a3e; border: 1px solid #444; border-radius: 6px; padding: 8px 12px; font-size: 0.78rem; color: #ddd; z-index: 10; line-height: 1.5; box-shadow: 0 4px 12px rgba(0,0,0,0.4); pointer-events: none; }
     .file:hover .tooltip { display: block; }
     .i1 { padding-left: 32px; }
     .i2 { padding-left: 48px; }
@@ -468,6 +468,14 @@ Produce a complete, valid HTML file using this structure — replace all placeho
       <div class="legend-item"><div class="legend-dot" style="background:#666"></div>Other</div>
     </div>
   </main>
+  <script>
+    document.querySelectorAll('.file').forEach(function(el) {
+      const inner = el.querySelector('.tooltip');
+      if (!inner) return;
+      el.addEventListener('mouseenter', function() { inner.style.display = 'block'; });
+      el.addEventListener('mouseleave', function() { inner.style.display = 'none'; });
+    });
+  </script>
 </body>
 </html>
 ```

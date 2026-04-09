@@ -1,0 +1,23 @@
+commands/document.md
+  a9781a41f8531235 409,412-414,471-478
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.5",
+  "base_commit_sha": "fd77d9f2cbd8cc2c6d7b0a1cf095396793bd75b9",
+  "prompts": {
+    "a9781a41f8531235": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "02a74bf6-3f52-4efb-af2a-d56b16e66a97",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "hurleveur",
+      "messages": [],
+      "total_additions": 12,
+      "total_deletions": 4,
+      "accepted_lines": 12,
+      "overriden_lines": 0
+    }
+  }
+}

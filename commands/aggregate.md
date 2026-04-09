@@ -11,9 +11,9 @@ These notes are what `/check-in` reads — aggregate is the writer, check-in is 
 
 ## Context
 
-Identity and vault path from `<ingram-office-session>` tags. Read `CLAUDE.md` at vault root.
+Identity and vault path from `<claude-office-session>` tags. Read `CLAUDE.md` at vault root.
 
-State and logs stored in `~/.ingram-office/` (never committed).
+State and logs stored in `~/.claude-office/` (never committed).
 
 ## Core Principle: Synthesize, Don't Parrot
 
@@ -44,7 +44,7 @@ git pull
 
 ### 2. Detect Changes
 
-Read `~/.ingram-office/aggregation-state.json`:
+Read `~/.claude-office/aggregation-state.json`:
 ```json
 {
   "last_run": "2026-03-29T22:00:00Z",
@@ -149,9 +149,9 @@ For each affected project's `status.md`, write a `## Team Notes` section inside 
 
 ### 6. Update State & Log
 
-Write `~/.ingram-office/aggregation-state.json` with current commit SHA and errors.
+Write `~/.claude-office/aggregation-state.json` with current commit SHA and errors.
 
-Append to `~/.ingram-office/logs/daily-aggregation.log`:
+Append to `~/.claude-office/logs/daily-aggregation.log`:
 ```
 [2026-03-30T22:00:00Z] RUN daily-aggregation
   mode: incremental | affected_projects: [ingram-cloud, security]

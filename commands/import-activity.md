@@ -9,7 +9,7 @@ When sessions were not captured by the session-end hook — before the plugin wa
 
 ## Context
 
-Identity and vault path from `<ingram-office-session>` tags.
+Identity and vault path from `<claude-office-session>` tags.
 
 ## Examples
 
@@ -287,7 +287,7 @@ For each selected session, write an entry to the appropriate activity file (see 
 
 You don't need to use this script initially, you can simply read the files, only use the script to extract session informations, and avoid overly using it.
 
-**CRITICAL: Never truncate prompts.** Do NOT abbreviate, summarize, add "...", or shorten any prompt text. Every prompt must appear exactly as the user typed it, character for character, no matter how long. This is a logging tool — fidelity is the entire point.
+**CRITICAL: Never truncate prompts.** Do NOT abbreviate, summarize, add "...", or shorten any prompt text. Every prompt must appear exactly as the user typed it, character for character, no matter how long. This is a logging tool — fidelity is the entire point. You should use a script to copy, not reading it yourself.
 
 **MANDATORY: Use a single Bash+node script to format AND write all entries directly to the file.** Do NOT:
 - Type out or paraphrase prompt text in your response
@@ -397,7 +397,7 @@ After writing, report what was imported:
 > Imported 12 sessions across 3 projects:
 > - `activity-ingram-cloud.md` — 5 sessions
 > - `activity-cyberspace.md` — 4 sessions
-> - `activity-ingram-office-plugin.md` — 3 sessions
+> - `activity-claude-office.md` — 3 sessions
 >
 > These files contain raw session data. Consider reviewing them to extract key decisions, insights, or summaries into your project docs.
 

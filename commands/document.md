@@ -18,7 +18,7 @@ When you want to create or update reference documentation for any project. The p
 
 ## Setup
 
-Read `~/.ingram-office/identity.json` to get:
+Read `~/.claude-office/identity.json` to get:
 - `name`: your identity
 - `vaultPath`: path to the vault
 

@@ -8,7 +8,7 @@ Run weekly or on-demand. Produces a strategic retrospective that reads what `/ag
 
 ## Context
 
-Identity and vault path from `<ingram-office-session>` tags. Read `CLAUDE.md` at vault root.
+Identity and vault path from `<claude-office-session>` tags. Read `CLAUDE.md` at vault root.
 
 ## Process
 
@@ -85,7 +85,7 @@ If a previous retro exists, read it for trend comparison.
 
 ### 3. Log the Run
 
-Append to `~/.ingram-office/logs/retro.log`:
+Append to `~/.claude-office/logs/retro.log`:
 ```
 [2026-03-30T22:00:00Z] RUN retro
   period: 2026-03-23 to 2026-03-30 | week: W13

@@ -1,12 +1,12 @@
 {
-  "name": "ingram-office",
+  "name": "claude-office",
   "description": "Ingram Office vault plugin: activity tracking, aggregation, and retrospectives. Flow: /setup-identity (once) → sessions auto-log to activity.md → /aggregate builds project status → /check-in gives you a personal briefing → /retro for weekly synthesis.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": {
-    "name": "Ingram"
+    "name": "ingram-technologies"
   },
-  "repository": "https://github.com/ingram/ingram-office-plugin",
-  "license": "MIT",
+  "repository": "https://github.com/ingram/claude-office",
+  "license": "Apache2",
   "keywords": [
     "obsidian",
     "project-management",

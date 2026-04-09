@@ -5,7 +5,7 @@ description: "Centralized documentation awareness — understand the Ingram Offi
 
 ## Purpose
 
-You have access to a **centralized documentation vault** — a shared Obsidian + Git repo where the team keeps project docs, architecture decisions, status updates, activity logs, and personal profiles. The vault path is provided in the `<ingram-office-session>` context injected at session start.
+You have access to a **centralized documentation vault** — a shared Obsidian + Git repo where the team keeps project docs, architecture decisions, status updates, activity logs, and personal profiles. The vault path is provided in the `<claude-office-session>` context injected at session start.
 
 Use this knowledge to **read relevant docs when they'd help answer a question or inform your work**. You don't need to be told to check the vault — if a question touches on project status, architecture, team structure, decisions, or priorities, go read the relevant files.
 

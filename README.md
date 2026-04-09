@@ -9,7 +9,7 @@ Task tracking happens in GitHub. This plugin handles doc sync, change visibility
 1. To install the plugin in Claude Code, run `/plugin marketplace add ingram-technologies/claude-office` then `/plugin install ingram-technologies@claude-office` (we recommend activating it for specific repositories instead of account wide)
 2. Fork the vault template from https://github.com/ingram-technologies/claude-office-vault (you probably want to make your repo private)
 3. Run `/setup-identity your-name /path/to/vault` to do the one time setup of which team member you are and where the vault is located
-4. Either run `/reload-plugins` or restart your session — hooks activate automatically and store what you do in activity.md when the plugin is active 
+4. Restart your session — hooks will activate automatically and store what you do in activity-<project-name>.md when the plugin is active 
 5. You can use `/check-in` to get context on your projects, and `/import-activity` to add past activity to the activity.md in a selective way
 6. Use `/aggregate` for daily aggregation (works since the last time it ran) and `/retro` to update the documentation to match
 
@@ -79,7 +79,7 @@ session-end (automatic)
 
 ## Local State
 
-Stored in `~/.ingram-office/` (never committed to git):
+Stored in `~/.claude-office/` (never committed to git):
 
 | File | Purpose |
 |------|---------|

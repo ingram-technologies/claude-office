@@ -17,9 +17,9 @@ If arguments are provided, parse as `<name>` and `<vault-path>`. Otherwise ask:
 
 **The vault is a separate GitHub repository** (not part of this plugin). It's an Obsidian vault where the team keeps docs, project statuses, and coordination files. It should already contain `CLAUDE.md`, a `/team/` folder, and a `/team/_new_user/` template. If you don't have the vault yet, clone it first and then come back.
 
-Create `~/.ingram-office/` and `~/.ingram-office/logs/` if they don't exist.
+Create `~/.claude-office/` and `~/.claude-office/logs/` if they don't exist.
 
-Write `~/.ingram-office/identity.json`:
+Write `~/.claude-office/identity.json`:
 ```json
 {
   "name": "<name>",

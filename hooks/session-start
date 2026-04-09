@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# SessionStart hook for ingram-office plugin
+# SessionStart hook for claude-office plugin
 # Pulls vault, injects identity + recent doc changes summary
 
 set -euo pipefail
 
-IDENTITY_FILE="$HOME/.ingram-office/identity.json"
+IDENTITY_FILE="$HOME/.claude-office/identity.json"
 
 if [ ! -f "$IDENTITY_FILE" ]; then
-  context="<ingram-office-setup>\nIngram Office plugin is not configured. Run /setup-identity to set your name and vault path before using any commands.\n</ingram-office-setup>"
+  context="<claude-office-setup>\nIngram Office plugin is not configured. Run /setup-identity to set your name and vault path before using any commands.\n</claude-office-setup>"
 else
   parse_json() {
     local file="$1" key="$2"
@@ -20,7 +20,7 @@ else
   VAULT=$(parse_json "$IDENTITY_FILE" "vault")
 
   if [ -z "$NAME" ] || [ -z "$VAULT" ] || [ ! -d "$VAULT" ]; then
-    context="<ingram-office-error>\nIdentity file exists but is invalid or vault path missing. Run /setup-identity to fix.\n</ingram-office-error>"
+    context="<claude-office-error>\nIdentity file exists but is invalid or vault path missing. Run /setup-identity to fix.\n</claude-office-error>"
   else
     # Git pull
     if cd "$VAULT" 2>/dev/null; then
@@ -41,7 +41,7 @@ else
     fi
 
     # Build context
-    summary="<ingram-office-session identity=\"$NAME\" vault=\"$VAULT\">"
+    summary="<claude-office-session identity=\"$NAME\" vault=\"$VAULT\">"
     summary="$summary\nYou are working as **$NAME** in the Ingram Office vault at \`$VAULT\`."
     summary="$summary\nThis vault is a central documentation hub. Task tracking happens in GitHub."
     summary="$summary\nAvailable commands: /check-in, /aggregate, /retro, /setup-identity, /import-activity"
@@ -50,7 +50,7 @@ else
     [ "$task_count" -gt 0 ] && summary="$summary\n- **$task_count open todo(s)** in your task.md"
     [ "$others_changed" -gt 0 ] && summary="$summary\n- **Docs changed in last 24h** — run /check-in for details"
 
-    summary="$summary\n</ingram-office-session>"
+    summary="$summary\n</claude-office-session>"
     context="$summary"
   fi
 fi

@@ -8,7 +8,7 @@ Start of day or start of a work session. This is YOUR personal check-in — a mo
 
 ## Context
 
-Identity and vault path from `<ingram-office-session>` tags. Read `CLAUDE.md` at vault root.
+Identity and vault path from `<claude-office-session>` tags. Read `CLAUDE.md` at vault root.
 
 ## Process
 

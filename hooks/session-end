@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# Stop hook for ingram-office plugin
-# Extracts session overview from transcript, logs to activity.md
+# Stop hook for claude-office plugin
+# Extracts session overview from transcript, logs to activity-<project>.md
 # Does NOT commit — obsidian-git handles that automatically
 
 set -euo pipefail
 
-IDENTITY_FILE="$HOME/.ingram-office/identity.json"
-STATE_FILE="$HOME/.ingram-office/last-session-state.json"
+IDENTITY_FILE="$HOME/.claude-office/identity.json"
+STATE_FILE="$HOME/.claude-office/last-session-state.json"
 
 [ ! -f "$IDENTITY_FILE" ] && exit 0
 
@@ -22,8 +22,8 @@ VAULT=$(parse_json "$IDENTITY_FILE" "vault")
 
 [ -z "$NAME" ] || [ -z "$VAULT" ] || [ ! -d "$VAULT" ] && exit 0
 
-activity_file="$VAULT/team/$NAME/activity.md"
-[ ! -f "$activity_file" ] && exit 0
+activity_dir="$VAULT/team/$NAME"
+[ ! -d "$activity_dir" ] && exit 0
 
 # Read Stop hook stdin for session info
 hook_input=$(cat)
@@ -53,6 +53,11 @@ if [ -f "$STATE_FILE" ]; then
   prev_session=$(parse_json "$STATE_FILE" "session_id")
   prev_msg_count=$(parse_json "$STATE_FILE" "msg_count")
   [ -z "$prev_msg_count" ] && prev_msg_count=0
+fi
+
+# Fallback: if transcript_path is missing (e.g. VS Code extension), find it by session_id
+if [ -z "$transcript_path" ] && [ -n "$session_id" ]; then
+  transcript_path=$(find "$HOME/.claude/projects" -name "${session_id}.jsonl" 2>/dev/null | head -1 || true)
 fi
 
 # Extract session overview from transcript
@@ -194,6 +199,13 @@ prompt_count=$(echo "$overview" | grep '^PROMPTS::' | head -1 | sed 's/^PROMPTS:
 tool_summary=$(echo "$overview" | grep '^TOOLS::' | head -1 | sed 's/^TOOLS:://' || true)
 tokens=$(echo "$overview" | grep '^TOKENS::' | head -1 | sed 's/^TOKENS:://' || true)
 session_files=$(echo "$overview" | grep '^SESSION_FILES::' | head -1 | sed 's/^SESSION_FILES:://' || true)
+
+# Determine activity file: activity-<repo>.md, fallback to activity.md
+if [ -n "$repo" ]; then
+  activity_file="$activity_dir/activity-${repo}.md"
+else
+  activity_file="$activity_dir/activity.md"
+fi
 
 cd "$VAULT" || exit 0
 

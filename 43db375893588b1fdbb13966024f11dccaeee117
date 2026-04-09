@@ -1,0 +1,41 @@
+hooks/session-end
+  f840a7d5466e90ba 3,25-26,58-62,203-209
+.claude-plugin/marketplace.json
+  f840a7d5466e90ba 5,9
+  a12f39477c862e6e 2
+.claude-plugin/plugin.json
+  f840a7d5466e90ba 2,6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.5",
+  "base_commit_sha": "43db375893588b1fdbb13966024f11dccaeee117",
+  "prompts": {
+    "a12f39477c862e6e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "af43deba-52c2-48ab-94f8-539dc9ac58a3",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "hurleveur",
+      "messages": [],
+      "total_additions": 1,
+      "total_deletions": 1,
+      "accepted_lines": 1,
+      "overriden_lines": 0
+    },
+    "f840a7d5466e90ba": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ec33ce80-ca87-4613-baa7-5a3aa917ae53",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "hurleveur",
+      "messages": [],
+      "total_additions": 20,
+      "total_deletions": 8,
+      "accepted_lines": 19,
+      "overriden_lines": 0
+    }
+  }
+}

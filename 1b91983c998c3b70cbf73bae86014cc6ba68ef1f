@@ -1,0 +1,21 @@
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "1b91983c998c3b70cbf73bae86014cc6ba68ef1f",
+  "prompts": {
+    "d818fd186f02f8eb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7bbbac90-6984-4baa-b7b8-a9a6cd7941ff",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "hurleveur",
+      "messages": [],
+      "total_additions": 96,
+      "total_deletions": 95,
+      "accepted_lines": 55,
+      "overriden_lines": 13
+    }
+  }
+}

@@ -1,0 +1,23 @@
+commands/init.md
+  d818fd186f02f8eb 1-5,7-75
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "2ee8c477c2123d97653624037c935f147fcaecf6",
+  "prompts": {
+    "d818fd186f02f8eb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7bbbac90-6984-4baa-b7b8-a9a6cd7941ff",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "hurleveur",
+      "messages": [],
+      "total_additions": 90,
+      "total_deletions": 14,
+      "accepted_lines": 74,
+      "overriden_lines": 2
+    }
+  }
+}

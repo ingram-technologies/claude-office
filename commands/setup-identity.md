@@ -19,7 +19,7 @@ If arguments are provided, parse as `<name>` and `<vault-path>`. Otherwise ask:
 
 Create `~/.claude-office/` and `~/.claude-office/logs/` if they don't exist.
 
-Write `~/.claude-office/identity.json`:
+Write `~/.claude-office/identity.json` if it doesn't already exist:
 ```json
 {
   "name": "<name>",

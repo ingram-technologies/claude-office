@@ -87,3 +87,8 @@ Stored in `~/.claude-office/` (never committed to git):
 | `aggregation-state.json` | Last commit SHA for incremental diff detection |
 | `logs/daily-aggregation.log` | Run history for debugging |
 | `logs/retro.log` | Run history for debugging |
+
+## Recommendation
+
+We recommend using the obsidian web clipper extension to easily add web pages to your various projects.
+

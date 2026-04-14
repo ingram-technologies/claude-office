@@ -7,8 +7,8 @@ Task tracking happens in GitHub. This plugin handles doc sync, change visibility
 ## Setup
 
 1. To install the plugin in Claude Code, run `/plugin marketplace add ingram-technologies/claude-office` then `/plugin install ingram-technologies@claude-office` (we recommend activating it for specific repositories instead of account wide)
-2. Fork the vault template from https://github.com/ingram-technologies/claude-office-vault (you probably want to make your repo private)
-3. Run `/setup-identity your-name /path/to/vault` to do the one time setup of which team member you are and where the vault is located
+2. Run `/init your-name /path/to/vault` — clones the vault template, sets up Obsidian config, and saves your basic identity. Optionally creates a GitHub repo via `gh` CLI.
+3. Run `/setup-identity your-name /path/to/vault` to fill out your profile, you can run the command bare too.
 4. Restart your session — hooks will activate automatically and store what you do in activity-<project-name>.md when the plugin is active 
 5. You can use `/check-in` to get context on your projects, and `/import-activity` to add past activity to the activity.md in a selective way
 6. Use `/aggregate` for daily aggregation (works since the last time it ran) and `/retro` to update the documentation to match
@@ -29,7 +29,8 @@ Hooks are shell scripts — deterministic, no context waste. They inject metadat
 | `/check-in` | Resume your session — reads per-person notes from `/aggregate`, recaps last work, shows todos, stamps profile |
 | `/aggregate` | Parse activity.md logs + git diffs, write per-person Team Notes into each project's status.md (daily scheduled) |
 | `/retro` | Weekly cross-project synthesis — team velocity, collaboration health, strategic observations (weekly scheduled) |
-| `/setup-identity` | Configure your name and vault path (run once) |
+| `/init` | First-time setup — clone the vault template, set up Obsidian config, save identity, optionally create GitHub repo |
+| `/setup-identity` | Fill out your profile (run after `/init`, or to reconfigure) |
 | `/import-activity` | Import previous activity on various projects, you can either enter the command without arguments to see your options or specify |
 
 ## Architecture

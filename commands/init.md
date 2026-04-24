@@ -24,18 +24,28 @@ git -C "<destination-path>" remote remove origin
 
 If the clone fails, stop and report the error clearly.
 
-## Step 3: Run the Obsidian Sync Script
+## Step 3: Fix Hook Permissions (macOS/Linux only)
+
+Detect the OS from the environment (`$OS`, `uname`, etc.). If on **macOS or Linux**, make the hook scripts executable before anything else runs:
+
+```bash
+chmod +x "${CLAUDE_PLUGIN_ROOT}/hooks/run-hook.cmd"
+```
+
+Skip this step on Windows.
+
+## Step 4: Run the Obsidian Sync Script
 
 This sets up the `.obsidian/` config from the bundled template:
 
 - **Windows:** `powershell -ExecutionPolicy Bypass -File "<destination-path>/sync-obsidian.ps1"`
 - **macOS/Linux:** `bash "<destination-path>/sync-obsidian.sh"`
 
-Detect the OS from the environment (`$OS`, `uname`, etc.) to pick the right script.
+Use the OS already detected in the previous step to pick the right script.
 
 If the script fails, warn the user but don't stop — they can run it manually later.
 
-## Step 4: Save Identity
+## Step 5: Save Identity
 
 Create `~/.claude-office/` and `~/.claude-office/logs/` if they don't exist.
 
@@ -47,7 +57,7 @@ Write `~/.claude-office/identity.json`:
 }
 ```
 
-## Step 5: Create GitHub Repo (Optional)
+## Step 6: Create GitHub Repo (Optional)
 
 Ask the user if they want to publish the vault to GitHub now:
 
@@ -65,7 +75,7 @@ If no, remind them:
 
 > When you're ready: `gh repo create <name> --private --source="<destination-path>" --push`
 
-## Step 6: Done
+## Step 7: Done
 
 Tell the user:
 

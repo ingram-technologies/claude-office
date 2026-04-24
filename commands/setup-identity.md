@@ -12,7 +12,7 @@ This is the onboarding command. It sets up identity, fills out the user's profil
 ## Step 1: Identity
 
 If arguments are provided, parse as `<name>` and `<vault-path>`. Otherwise ask:
-- "What's your name?" (must match their folder name in `/team/<name>/`, lowercase)
+- "What's your name?" (must match their folder name in `/team/<name>/`, and the identity name in `identity.json`, case sensitive)
 - "Where is your Ingram Office vault?" (absolute path, e.g., `C:/Users/alex/Documents/ingram-vault`)
 
 **The vault is a separate GitHub repository** (not part of this plugin). It's an Obsidian vault where the team keeps docs, project statuses, and coordination files. It should already contain `CLAUDE.md`, a `/team/` folder, and a `/team/_new_user/` template. If you don't have the vault yet, clone it first and then come back.

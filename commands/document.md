@@ -106,6 +106,16 @@ Note what exists — these will be read in Phase 2.
 Before generating anything, present a summary and proposed plan. This is the only moment the user can redirect the output.
 Look at the existing information and see what files you can create from this information based on the /new_project template (read the template before deciding and presenting the results).
 
+At this checkpoint, you must also ask for **codebase.html preferences** and wait for the response before proceeding.
+
+Ask these explicitly:
+- Preferred visual style (clean/minimal, dashboard-heavy, technical/terminal, etc.)
+- Preferred density (compact vs more explanation)
+- Whether they want an executive summary tone or deep technical tone
+- Whether to include extra spotlight sections for important code segments/modules
+
+If they want spotlight sections, ask what to emphasize (for example: auth flow, data layer, API boundaries, deployment path, performance-critical paths, legacy hotspots). If they do not specify, pick 3-5 based on evidence and label them as AI-selected.
+
 ### Format your message in a similar way, but DO NOT copy this directly:
 
 ---
@@ -145,9 +155,17 @@ Then ask:
 > - Add custom files (name them + one sentence on what they should cover)
 > - Adjust scope with `--since` if not already set
 >
+> For `codebase.html`, tell me your preference for style, density, and whether you want spotlight cards for specific important code segments.
+>
 > Confirm to proceed, or tell me what to change."
 
 **Wait for the user's response.** Apply any changes to the file list. If they say "go ahead" or equivalent, proceed with the proposed list. Note their choice on update vs. regenerate if vault docs exist.
+
+If the user does not provide `codebase.html` preferences, use defaults and state them before generation:
+- style: dashboard-heavy, readable
+- density: medium
+- tone: technical with brief executive context
+- spotlight segments: enabled (AI-selected, evidence-based)
 
 ## Phase 2: Deep Exploration + Generation
 
@@ -359,7 +377,33 @@ Write to `<vaultPath>/projects/<PROJECT_NAME>/codebase.html`.
 
 A self-contained HTML file — no external CDN links, no external JS libraries. All styles and scripts inline. Must work offline and open in any browser without a web server.
 
-The file shows a visual, annotated map of the codebase's file structure. It is NOT a code viewer — it's a navigation aid that tells someone where to start and what to watch out for.
+The file is a **codebase presentation** — a guided tour of the project designed to be shared, reviewed, and presented. Think of it as a slide deck that explains "what this project is, why it's built that way, what matters, and where to look."
+
+It is NOT a code viewer or dry reference — it's a narrative journey that:
+- Opens with a hook (what this project is and why it exists)
+- Builds context (direction, design, priorities)
+- Highlights what matters most (attention areas, important segments)
+- Closes with a map and next steps (file tree, actionable guidance)
+
+Honor user preferences collected at Checkpoint for layout style, density, tone, and spotlight behavior.
+
+#### Presentation structure
+
+The HTML should flow like a presentation deck with these scenes:
+
+1. **Title slide** (header): Project name, one-liner, generated date
+2. **Executive snapshot** (project brief): What it is, direction, key choices, priorities
+3. **Risk landscape** (attention panel): Multi-aspect health/risk view — helps audience understand what to pay attention to
+4. **Code highlights** (important segments spotlight): Deep dives into critical paths, architectural decisions, hotspots — optional but recommended
+5. **Navigation map** (file tree + legend): Where to explore, color-coded by role, annotated with entry points and hotspots
+
+Each section should feel like a cohesive unit (a "slide") that can be presented or reviewed independently.
+
+Audience framing: The presentation should be usable by:
+- New team members onboarding into the project
+- Code reviewers evaluating changes
+- Decision-makers assessing risk/stability
+- Developers diving deep into a specific module
 
 It must also include a concise **top-of-page project brief** so the page is useful even before someone reads the tree.
 
@@ -376,9 +420,13 @@ Before the tree, add a compact dashboard section with these blocks:
 
 This brief should fit above the fold on a laptop when possible. Keep it signal-dense and avoid generic filler.
 
+**Presentation angle:** This is your "executive summary" slide — the first thing someone sees. Make it count. Answer: "Why should I care about this project?" and "What's the current state?"
+
 #### Attention panel (required)
 
-Add a section between the project brief and file tree called **Attention Areas**.
+Add a section between the project brief and code highlights called **Attention Areas**.
+
+**Presentation angle:** This is your "risk/health landscape" slide. Help the audience quickly grasp what's healthy, what needs watching, and where the risks are. Use color (green/yellow/red) deliberately.
 
 It must include at least 4 cards (up to 6), each representing a different aspect. Use evidence from code, git, docs, and sessions.
 
@@ -400,6 +448,35 @@ Each card must include:
 
 Do not make all cards the same level. If signal is weak, mark `watch` with "Unknown — add manually".
 
+#### Important code segments spotlight (optional, user-driven)
+
+If the user asked for extra information about important code segments, add a section named **Important Code Segments**.
+
+Requirements:
+- Include 3-8 segments/modules depending on project size
+- For each segment include: segment name, why it matters, where to start reading, risk/complexity note, related files
+- Use evidence from source, commit churn, and activity sessions when available
+- If user named preferred segments, prioritize those first
+
+Suggested HTML shape:
+
+```html
+<section class="segments" aria-label="Important code segments">
+  <h2>Important Code Segments</h2>
+  <article class="segment-card">
+    <h3>SEGMENT_NAME</h3>
+    <p>Why it matters: ...</p>
+    <p>Start here: ...</p>
+    <p>Risk/complexity: ...</p>
+    <p>Related files: ...</p>
+  </article>
+</section>
+```
+
+If spotlight segments are disabled by the user, skip this section.
+
+**Presentation angle:** If included, this is your "deep dive" slides — where you walk the audience through critical code journeys. Show why these segments matter for understanding the whole project. Use this to tell a story about how the code is organized, not just list modules.
+
 #### File classification
 
 Classify each file from the Phase 1 tree before generating:
@@ -418,6 +495,8 @@ Mark 1–3 files with ★ "Start here" — the best entry points for understandi
 Mark files with ⚠️ if they have high git churn (>8 commits in the 60-commit log) or are unusually complex. Add a hover note explaining why.
 
 Only annotate files where an annotation adds non-obvious value. Most files don't need one.
+
+**Presentation angle:** This is your "navigation map" slide — the final piece. It shows the audience exactly where to look next. The color coding and entry points are your breadcrumbs. Use hover annotations as "presenter notes" that guide deeper exploration.
 
 #### HTML to generate
 

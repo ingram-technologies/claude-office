@@ -1,0 +1,37 @@
+commands/document.md
+  s_9389c8d51436f1::t_d7530087afe4a3 2,17,73,75,85,114,176,263,296,338,340,522,525
+hooks/session-end
+  s_9389c8d51436f1::t_0b16651992b962 3,25-28,130,206,216-217
+commands/setup-identity.md
+  s_9389c8d51436f1::t_72ceb67771d580 84,97
+commands/check-in.md
+  s_9389c8d51436f1::t_2b2ecf3c20daf8 48,111
+commands/retro.md
+  s_9389c8d51436f1::t_788cf37bc7ddec 24-25,109
+.claude-plugin/plugin.json
+  s_9389c8d51436f1::t_e82c1799085938 3
+skills/vault-awareness/SKILL.md
+  s_9389c8d51436f1::t_8a5aa7800b50bf 22-23,48,71
+README.md
+  s_9389c8d51436f1::t_8fd03fab5d0f75 12-13,21,30,41,50,54,65,71-72,75
+commands/import-activity.md
+  s_9389c8d51436f1::t_c953c8a752789b 29,32,34,36,255,406,451
+commands/aggregate.md
+  s_9389c8d51436f1::t_c75883e6b5d157 8,29,34,66,69,144,175
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.9",
+  "base_commit_sha": "281cfc76dbeea3769709eb7eee342cd4d756e079",
+  "prompts": {},
+  "sessions": {
+    "s_9389c8d51436f1": {
+      "agent_id": {
+        "tool": "github-copilot",
+        "id": "46b9e44c-5d54-46a5-88b7-cf088e032442",
+        "model": "gpt-5-mini"
+      },
+      "human_author": "hurleveur <belliorum@gmail.com>"
+    }
+  }
+}

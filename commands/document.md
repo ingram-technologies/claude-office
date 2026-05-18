@@ -361,6 +361,45 @@ A self-contained HTML file — no external CDN links, no external JS libraries. 
 
 The file shows a visual, annotated map of the codebase's file structure. It is NOT a code viewer — it's a navigation aid that tells someone where to start and what to watch out for.
 
+It must also include a concise **top-of-page project brief** so the page is useful even before someone reads the tree.
+
+It must include an **attention panel** that highlights multiple important project aspects in one glance.
+
+#### Top-of-page project brief (required)
+
+Before the tree, add a compact dashboard section with these blocks:
+
+- **What this project is**: 2-3 sentence technical summary (system type, core responsibility, where it runs)
+- **Current direction**: 2-3 sentences on active focus based on recent commits/sessions; if unknown, say "Unknown — add manually"
+- **Key design choices**: 3-5 bullets of non-obvious choices with why they matter
+- **What matters now**: a short priority list (`P0`, `P1`, optional `P2`) with explicit actions
+
+This brief should fit above the fold on a laptop when possible. Keep it signal-dense and avoid generic filler.
+
+#### Attention panel (required)
+
+Add a section between the project brief and file tree called **Attention Areas**.
+
+It must include at least 4 cards (up to 6), each representing a different aspect. Use evidence from code, git, docs, and sessions.
+
+Suggested aspects:
+
+- Reliability / test coverage
+- Security posture
+- Change hotspots / churn
+- Dependency or infrastructure risk
+- Documentation or onboarding gaps
+- Delivery momentum / staleness
+
+Each card must include:
+
+- A clear label
+- A status level (`healthy`, `watch`, or `risk`)
+- 1 concise evidence line
+- 1 action line starting with `Action:`
+
+Do not make all cards the same level. If signal is weak, mark `watch` with "Unknown — add manually".
+
 #### File classification
 
 Classify each file from the Phase 1 tree before generating:
@@ -398,7 +437,29 @@ Produce a complete, valid HTML file using this structure — replace all placeho
     header h1 { font-size: 1.4rem; color: #fff; margin-bottom: 4px; }
     header p { color: #aaa; font-size: 0.85rem; }
     .meta { color: #555; font-size: 0.75rem; margin-top: 4px; }
-    main { display: flex; }
+    .brief { margin: 16px 32px 0; padding: 16px; border: 1px solid #333; border-radius: 10px; background: linear-gradient(135deg, #22263a, #1a1a2e); }
+    .brief-grid { display: grid; grid-template-columns: repeat(2, minmax(260px, 1fr)); gap: 12px; }
+    .brief-card { background: rgba(255,255,255,0.03); border: 1px solid #3a3a52; border-radius: 8px; padding: 12px; }
+    .brief-card h2 { font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.07em; color: #9fb3ff; margin-bottom: 8px; }
+    .brief-card p, .brief-card li { font-size: 0.82rem; color: #d7d7e8; line-height: 1.45; }
+    .brief-card ul { margin-left: 16px; }
+    .attention { margin: 12px 32px 0; }
+    .attention h2 { font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.07em; color: #8ed7c6; margin-bottom: 8px; }
+    .attention-grid { display: grid; grid-template-columns: repeat(3, minmax(180px, 1fr)); gap: 10px; }
+    .att-card { border: 1px solid #3a3a52; border-radius: 8px; padding: 10px; background: rgba(255,255,255,0.02); }
+    .att-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .att-name { font-size: 0.8rem; color: #e9e9f8; font-weight: 600; }
+    .att-level { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.06em; border-radius: 999px; padding: 2px 7px; font-weight: 700; }
+    .lvl-healthy { background: #1f4f37; color: #a5efcf; }
+    .lvl-watch { background: #5a4a1d; color: #ffd98c; }
+    .lvl-risk { background: #5b1f2a; color: #ffb3bd; }
+    .att-evidence, .att-action { font-size: 0.78rem; color: #cfcfe2; line-height: 1.4; }
+    .att-action { margin-top: 4px; color: #f1f1ff; }
+    .prio { display: inline-block; font-size: 0.68rem; font-weight: 700; border-radius: 999px; padding: 2px 7px; margin-right: 6px; }
+    .p0 { background: #5c1f1f; color: #ffb3b3; }
+    .p1 { background: #5b4516; color: #ffd27a; }
+    .p2 { background: #1d4e57; color: #9be8f5; }
+    main { display: flex; margin-top: 12px; }
     #tree { padding: 24px 32px; flex: 1; min-width: 0; }
     #legend { padding: 24px; width: 220px; border-left: 1px solid #333; flex-shrink: 0; }
     .legend-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: #888; margin-bottom: 12px; }
@@ -424,6 +485,63 @@ Produce a complete, valid HTML file using this structure — replace all placeho
     <p>ONE_SENTENCE_SUMMARY</p>
     <p class="meta">Generated YYYY-MM-DD &nbsp;·&nbsp; <span style="color:#4CAF50">★ start here</span> &nbsp;·&nbsp; <span style="color:#f0a500">⚠️ high churn</span></p>
   </header>
+  <section class="brief" aria-label="Project brief">
+    <div class="brief-grid">
+      <article class="brief-card">
+        <h2>What This Is</h2>
+        <p>TECHNICAL_SUMMARY</p>
+      </article>
+      <article class="brief-card">
+        <h2>Current Direction</h2>
+        <p>CURRENT_DIRECTION</p>
+      </article>
+      <article class="brief-card">
+        <h2>Key Design Choices</h2>
+        <ul>
+          <li>CHOICE_1</li>
+          <li>CHOICE_2</li>
+          <li>CHOICE_3</li>
+        </ul>
+      </article>
+      <article class="brief-card">
+        <h2>What Matters Now</h2>
+        <p><span class="prio p0">P0</span>PRIORITY_ACTION_0</p>
+        <p><span class="prio p1">P1</span>PRIORITY_ACTION_1</p>
+        <p><span class="prio p2">P2</span>PRIORITY_ACTION_2_OR_REMOVE</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="attention" aria-label="Attention areas">
+    <h2>Attention Areas</h2>
+    <div class="attention-grid">
+      <article class="att-card">
+        <div class="att-head">
+          <span class="att-name">Reliability</span>
+          <span class="att-level lvl-watch">watch</span>
+        </div>
+        <p class="att-evidence">EVIDENCE_LINE_1</p>
+        <p class="att-action">Action: ACTION_LINE_1</p>
+      </article>
+      <article class="att-card">
+        <div class="att-head">
+          <span class="att-name">Security</span>
+          <span class="att-level lvl-risk">risk</span>
+        </div>
+        <p class="att-evidence">EVIDENCE_LINE_2</p>
+        <p class="att-action">Action: ACTION_LINE_2</p>
+      </article>
+      <article class="att-card">
+        <div class="att-head">
+          <span class="att-name">Change Hotspots</span>
+          <span class="att-level lvl-healthy">healthy</span>
+        </div>
+        <p class="att-evidence">EVIDENCE_LINE_3</p>
+        <p class="att-action">Action: ACTION_LINE_3</p>
+      </article>
+    </div>
+  </section>
+
   <main>
     <div id="tree">
 
@@ -480,7 +598,11 @@ Produce a complete, valid HTML file using this structure — replace all placeho
 </html>
 ```
 
-Fill in the tree section with every file from Phase 1. The result must be complete valid HTML — no template placeholders left in the output file.
+Fill in the brief, attention, and tree sections with real content from Phase 1/2. The result must be complete valid HTML — no template placeholders left in the output file.
+
+If there is weak signal for a brief field:
+- Use explicit fallback text (for example, "Unknown — add manually")
+- Do not fabricate claims
 
 ## Closing Suggestions
 

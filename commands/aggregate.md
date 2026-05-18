@@ -5,7 +5,7 @@ argument-hint: "[--full]"
 
 ## When to Use
 
-Run as a **daily scheduled task** or manually. Synthesizes what happened across all projects by parsing activity.md session logs and git history, writes meaningful project narratives into status files.
+Run as a **daily scheduled task** or manually. Synthesizes what happened across all projects by parsing activity logs in `team/*/activity/*.md` and git history, writes meaningful project narratives into status files.
 
 These notes are what `/check-in` reads — aggregate is the writer, check-in is the reader.
 
@@ -26,12 +26,12 @@ Rules:
 - Never list file names or commit counts — that's what `git log` is for
 - Synthesize activity into **what was accomplished and where things stand**
 - Include decisions, blockers, and what needs attention from others
-- External repo work (from activity.md) is often more important than vault edits — summarize what was built, not what files were touched
+- External repo work (from `team/*/activity/*.md`) is often more important than vault edits — summarize what was built, not what files were touched
 - For per-person notes, use **"Where they're at"** / **"Blocked on"** / **"Needs from others"** instead of "Recent" / "Next" / "Coordinate with" — it reads more naturally and focuses on state rather than changelog
 
 ### First Run vs Incremental
 
-**First run** (no aggregation state or `--full`): Write a comprehensive overview of the entire project history. This should read like an executive summary — what each project is, what's been accomplished, current state, who's involved. Parse the full activity.md and git history.
+**First run** (no aggregation state or `--full`): Write a comprehensive overview of the entire project history. This should read like an executive summary — what each project is, what's been accomplished, current state, who's involved. Parse the full activity logs in `team/*/activity/` and git history.
 
 **Incremental runs**: Focus on what changed since last aggregation. Keep existing context, update what moved.
 
@@ -63,10 +63,10 @@ Build the set of **affected projects** from changed file paths. Also build a map
 
 ### 3. Parse Activity Logs
 
-This is the key data source for understanding work outside this vault. For each person with changes in `team/<name>/activity.md`:
+This is the key data source for understanding work outside this vault. For each person with changes in `team/<name>/activity/`:
 
 ```bash
-git diff <last_commit>..HEAD -- team/*/activity.md
+git diff <last_commit>..HEAD -- team/*/activity/*.md
 ```
 
 (For full scan, read the entire file.)
@@ -141,7 +141,7 @@ For each affected project's `status.md`, write a `## Team Notes` section inside 
 
 **Rules for writing these notes:**
 - Read the project's existing `status.md` (manual sections), `kanban.md`, and any other docs to understand priorities
-- Cross-reference git history AND activity.md to see who's active and what they're doing
+- Cross-reference git history AND activity logs (`team/*/activity/*.md`) to see who's active and what they're doing
 - Write narratives, not changelogs — "Completed pen test with 14 vulnerability write-ups" not "wrote 14 .md files"
 - Flag what's blocked and what needs input from others
 - For inactive assigned people, just note they're assigned with no activity — no judgment
@@ -172,7 +172,7 @@ Skip commit if nothing changed.
 ## Guardrails
 
 - **Read-only** on team folders — only writes to `/projects/`
-- **Activity.md is the primary lens** — parse session logs for external repo context, not just vault edits
+- **Activity logs are the primary lens** — parse `team/*/activity/*.md` for external repo context, not just vault edits
 - **Git history supplements** — shows what files changed in the vault itself
 - **Preserve manual edits** outside `<!-- auto-generated -->` markers
 - **Idempotent** — safe to run twice

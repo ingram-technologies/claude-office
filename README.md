@@ -9,8 +9,8 @@ Task tracking happens in GitHub. This plugin handles doc sync, change visibility
 1. To install the plugin in Claude Code, run `/plugin marketplace add ingram-technologies/claude-office` then `/plugin install ingram-technologies@claude-office` (we recommend activating it for specific repositories instead of account wide)
 2. Run `/init your-name /path/to/vault` — clones the vault template, sets up Obsidian config, and saves your basic identity. Optionally creates a GitHub repo via `gh` CLI.
 3. Run `/setup-identity your-name /path/to/vault` to fill out your profile, you can run the command bare too.
-4. Restart your session — hooks will activate automatically and store what you do in activity-<project-name>.md when the plugin is active 
-5. You can use `/check-in` to get context on your projects, and `/import-activity` to add past activity to the activity.md in a selective way
+4. Restart your session — hooks will activate automatically and store what you do in `team/<you>/activity/activity-<project-name>.md` when the plugin is active 
+5. You can use `/check-in` to get context on your projects, and `/import-activity` to add past activity to `team/<you>/activity/activity.md` in a selective way
 6. Use `/aggregate` for daily aggregation (works since the last time it ran) and `/retro` to update the documentation to match
 
 ## What Happens Automatically
@@ -18,7 +18,7 @@ Task tracking happens in GitHub. This plugin handles doc sync, change visibility
 | Event | Hook | What it does |
 |-------|------|-------------|
 | Session start | `session-start` | Git pull, inject identity + open todo count + recent change alerts |
-| Session end | `session-end` | Log prompts + file changes to activity.md (no auto-commit) |
+| Session end | `session-end` | Log prompts + file changes to `team/<you>/activity/activity.md` (no auto-commit) |
 
 Hooks are shell scripts — deterministic, no context waste. They inject metadata only (counts, never raw file content) to prevent prompt injection.
 
@@ -27,7 +27,7 @@ Hooks are shell scripts — deterministic, no context waste. They inject metadat
 | Command | What it does |
 |---------|-------------|
 | `/check-in` | Resume your session — reads per-person notes from `/aggregate`, recaps last work, shows todos, stamps profile |
-| `/aggregate` | Parse activity.md logs + git diffs, write per-person Team Notes into each project's status.md (daily scheduled) |
+| `/aggregate` | Parse activity logs in `team/*/activity/` + git diffs, write per-person Team Notes into each project's status.md (daily scheduled) |
 | `/retro` | Weekly cross-project synthesis — team velocity, collaboration health, strategic observations (weekly scheduled) |
 | `/init` | First-time setup — clone the vault template, set up Obsidian config, save identity, optionally create GitHub repo |
 | `/setup-identity` | Fill out your profile (run after `/init`, or to reconfigure) |
@@ -38,7 +38,7 @@ Hooks are shell scripts — deterministic, no context waste. They inject metadat
 ```
 hooks/
   session-start     — git pull, inject identity + counts (deterministic)
-  session-end       — parse transcript, log prompts + changes to activity.md (no auto-commit)
+  session-end       — parse transcript, log prompts + changes to team/<you>/activity/activity.md (no auto-commit)
 commands/
   *.md              — slash commands (self-contained instruction files)
 ```
@@ -47,11 +47,11 @@ commands/
 
 ```
 session-end (automatic)
-  writes: team/<you>/activity.md — session logs from work in external repos
+  writes: team/<you>/activity/activity.md — session logs from work in external repos
       │
       ▼
 /aggregate (daily, scheduled)
-  reads: activity.md logs (primary) + git history + project docs
+  reads: team/*/activity/*.md logs (primary) + git history + project docs
   writes: ## Team Notes with per-person subsections into each project
       │
       ▼
@@ -62,17 +62,17 @@ session-end (automatic)
       │
       ▼
 /retro (weekly, scheduled)
-  reads: aggregated project status files + activity.md patterns + git stats
+  reads: aggregated project status files + activity patterns from team/*/activity/*.md + git stats
   writes: weekly report with cross-project team analysis
 ```
 
 ## Design Decisions
 
-- **Activity log captures intent** — session-end extracts user prompts from the conversation transcript into activity.md
-- **Activity.md is the primary lens** — aggregate parses session logs to see work in external repos, not just vault edits
+- **Activity log captures intent** — session-end extracts user prompts from the conversation transcript into `team/<you>/activity/activity*.md`
+- **Activity logs are the primary lens** — aggregate parses session logs to see work in external repos, not just vault edits
 - **Hooks for deterministic work** — pull on start, log on end, commit/push is manual
 - **Metadata injection only** — hooks never inject raw file content into context (prompt injection prevention)
-- **Writer/reader chain** — session-end → activity.md → aggregate → project files → check-in / retro
+- **Writer/reader chain** — session-end → team/<you>/activity/*.md → aggregate → project files → check-in / retro
 - **Aggregate vs retro** — aggregate is the operational data pipeline (daily, per-project), retro is the strategic synthesis (weekly, cross-project)
 - **Session-end scoped to user** — only commits `team/<you>/`, never other folders
 - **Incremental aggregation** — git-diff change detection, only rebuilds affected projects

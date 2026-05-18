@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Stop hook for claude-office plugin
-# Extracts session overview from transcript, logs to activity-<project>.md
+# Extracts session overview from transcript, logs to activity/activity-<project>.md
 # Does NOT commit — obsidian-git handles that automatically
 
 set -euo pipefail
@@ -22,7 +22,10 @@ VAULT=$(parse_json "$IDENTITY_FILE" "vault")
 
 [ -z "$NAME" ] || [ -z "$VAULT" ] || [ ! -d "$VAULT" ] && exit 0
 
-activity_dir="$VAULT/team/$NAME"
+member_dir="$VAULT/team/$NAME"
+[ ! -d "$member_dir" ] && exit 0
+
+activity_dir="$member_dir/activity"
 [ ! -d "$activity_dir" ] && exit 0
 
 # Read Stop hook stdin for session info
@@ -124,7 +127,7 @@ if [ -n "$transcript_path" ] && [ -f "$transcript_path" ]; then
                 if(fp && (b.name==='Edit'||b.name==='Write'||b.name==='MultiEdit')){
                   // Extract basename
                   const base=fp.replace(/\\\\/g,'/').split('/').pop();
-                  if(base && base!=='activity.md') editedFiles.add(base);
+                  if(base && !/^activity(-.*)?\.md$/.test(base)) editedFiles.add(base);
                 }
               }
             }
@@ -200,7 +203,7 @@ tool_summary=$(echo "$overview" | grep '^TOOLS::' | head -1 | sed 's/^TOOLS:://'
 tokens=$(echo "$overview" | grep '^TOKENS::' | head -1 | sed 's/^TOKENS:://' || true)
 session_files=$(echo "$overview" | grep '^SESSION_FILES::' | head -1 | sed 's/^SESSION_FILES:://' || true)
 
-# Determine activity file: activity-<repo>.md, fallback to activity.md
+# Determine activity file inside team/<name>/activity/: activity-<repo>.md, fallback to activity.md
 if [ -n "$repo" ]; then
   activity_file="$activity_dir/activity-${repo}.md"
 else
@@ -210,8 +213,8 @@ fi
 cd "$VAULT" || exit 0
 
 # Also check git for uncommitted changes (complementary to transcript-based files)
-changed_files=$(git diff --name-only HEAD 2>/dev/null | grep -v "activity\.md" || true)
-untracked=$(git ls-files --others --exclude-standard 2>/dev/null | grep -v "activity\.md" || true)
+changed_files=$(git diff --name-only HEAD 2>/dev/null | grep -Ev "activity(-.*)?\.md" || true)
+untracked=$(git ls-files --others --exclude-standard 2>/dev/null | grep -Ev "activity(-.*)?\.md" || true)
 all_changes=""
 [ -n "$changed_files" ] && all_changes="$changed_files"
 if [ -n "$untracked" ]; then

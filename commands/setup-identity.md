@@ -81,7 +81,7 @@ After setup is complete, give the user a brief orientation:
 >
 > **Automatic (you don't need to do anything):**
 > - When you start a session, the plugin pulls the latest vault changes and shows you a quick summary
-> - When your session ends, it logs what docs you changed to your activity.md and pushes everything
+> - When your session ends, it logs what docs you changed to `team/<name>/activity/activity.md` (and per-project activity files) and pushes everything
 >
 > **Commands you can run:**
 > - `/check-in` — Start of day briefing. Shows what you were last working on, your priorities across projects, who you need to coordinate with, and your personal todos
@@ -94,7 +94,7 @@ After setup is complete, give the user a brief orientation:
 > **Your files:**
 > - `team/<name>/profile.md` — your bio (what we just filled out)
 > - `team/<name>/tasks.md` — your personal todo list (only you manage this)
-> - `team/<name>/activity.md` — automatic log of your doc changes (plugin writes this)
+> - `team/<name>/activity/activity.md` — automatic log of your doc changes (plugin writes this)
 >
 > **Task tracking happens in GitHub** — the vault is for documentation and coordination.
 >

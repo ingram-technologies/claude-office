@@ -1,0 +1,20 @@
+commands/document.md
+  s_9389c8d51436f1::t_43216a4c910943 366-367,378-394,396-402,446-457,511-540,601
+  s_9389c8d51436f1::t_4a7bb44d9bae64 364-365,368-377,395,440-445,458-462,488-510,541-544,603-605
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.9",
+  "base_commit_sha": "b1c63137a0ba9af279cb8a0de0190728a543632e",
+  "prompts": {},
+  "sessions": {
+    "s_9389c8d51436f1": {
+      "agent_id": {
+        "tool": "github-copilot",
+        "id": "46b9e44c-5d54-46a5-88b7-cf088e032442",
+        "model": "gpt-5-mini"
+      },
+      "human_author": "hurleveur <belliorum@gmail.com>"
+    }
+  }
+}

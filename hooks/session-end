@@ -26,7 +26,7 @@ member_dir="$VAULT/team/$NAME"
 [ ! -d "$member_dir" ] && exit 0
 
 activity_dir="$member_dir/activity"
-[ ! -d "$activity_dir" ] && exit 0
+mkdir -p "$activity_dir"
 
 # Read Stop hook stdin for session info
 hook_input=$(cat)

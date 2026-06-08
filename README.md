@@ -59,15 +59,15 @@ They are deterministic shell scripts — no AI, no surprises, no context waste. 
 Every day, this cycle runs and builds the shared team memory:
 
 ```
-activity logs  →  /aggregate  →  status.md files  →  /check-in  →  YOU (next session)
+activity logs  →  /claude-office:aggregate  →  status.md files  →  /claude-office:check-in  →  YOU (next session)
    (amber)         (glue cmd)       (in the vault)     (on-demand)     (briefed & ready)
 ```
 
-- **`/aggregate`** — parses all `team/*/activity.md` logs, writes per-person summaries into each project's `status.md`. Run daily (or schedule it).
-- **`/check-in`** — reads your subsection from each project's status, hands you back a personalized briefing: last work, priorities, what changed while you were away.
-- **`/retro`** — weekly synthesis across all projects, for strategic perspective.
+- **`/claude-office:aggregate`** — parses all activity logs, writes per-person summaries into each project's `status.md`. Run daily.
+- **`/claude-office:check-in`** — reads your subsection from each project's status, hands you back a personalized briefing.
+- **`/claude-office:retro`** — weekly synthesis across all projects, for strategic perspective.
 
-The loop means that the longer the team uses it, the richer the context becomes.
+The longer the team uses it, the richer the context becomes.
 
 ---
 
@@ -83,7 +83,7 @@ The plugin lives in your **project repos** (the spokes). The vault is set up onc
 
 ```bash
 /plugin marketplace add ingram-technologies/claude-office
-/plugin install ingram-technologies@claude-office
+/plugin install claude-office@ingram-technologies
 ```
 
 We recommend activating it per repository rather than account-wide.
@@ -91,7 +91,7 @@ We recommend activating it per repository rather than account-wide.
 **Step 2 — Initialize a project repo** (once per spoke)
 
 ```bash
-/init your-name /path/to/vault
+/claude-office:init your-name /path/to/vault
 ```
 
 Clones the vault template if it doesn't exist, sets up Obsidian config, saves your identity. Pass `--create-repo` to create the vault GitHub repo via `gh` CLI.
@@ -99,19 +99,21 @@ Clones the vault template if it doesn't exist, sets up Obsidian config, saves yo
 **Step 3 — Fill out your profile**
 
 ```bash
-/setup-identity your-name /path/to/vault
+/claude-office:setup-identity your-name /path/to/vault
 ```
 
-Run it bare (`/setup-identity`) to reconfigure at any time.
+Run it bare (`/claude-office:setup-identity`) to reconfigure at any time.
 
 **Step 4 — Restart your session**
 
 Hooks activate on the next session start. From here, everything runs automatically.
 
+> **Permission error on hooks?** Run `chmod +x ~/.claude/plugins/cache/ingram-technologies/claude-office/1.0.1/hooks/*` then restart.
+
 **Step 5 — Orient yourself**
 
 ```bash
-/check-in
+/claude-office:check-in
 ```
 
 Gets you up to speed on all active projects. Run this at the start of any session.

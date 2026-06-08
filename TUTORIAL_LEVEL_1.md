@@ -31,6 +31,8 @@ echo "# Fake Project" > README.md
 git add . && git commit -m "init sandbox project"
 ```
 
+> **Path tip:** use `~/` for an absolute path from your home directory (works from anywhere), or `./` for a path relative to your current folder (shorter, but only correct if you launch Claude Code from the right directory). Pick one style and use it consistently throughout — mixing them is the main source of "vault not found" errors.
+
 > 🔍 **Witness (Chunk 2 — Your Repos):** `fake-project/` is an ordinary git repo. Nothing special about it. This is what a spoke looks like.
 
 ---
@@ -40,11 +42,20 @@ git add . && git commit -m "init sandbox project"
 If you haven't already installed the plugin (see [Setup](README.md#setup)), do that first. Then, inside the fake project:
 
 ```bash
-/init test-user ~/sandbox-office/vault
-/setup-identity test-user ~/sandbox-office/vault
+/claude-office:init test-user ~/sandbox-office/vault
+/claude-office:setup-identity test-user ~/sandbox-office/vault
 ```
 
-> 🔍 **Witness (Chunk 1 — The Hub):** open `~/sandbox-office/vault` in your file browser or Obsidian. You'll see the vault structure appear — `team/test-user/` and a profile file. This is mission control, freshly built.
+> 🔍 **Witness (Chunk 1 — The Hub):** open `~/sandbox-office/vault` in your file browser or Obsidian. You'll see the vault structure appear — `team/test-user/` and a profile file. This is mission control, freshly built.  
+
+> **Permission error?** If you see `Permission denied` on the hook,
+> the plugin installer didn't set the executable bit. Fix it and restart:
+>
+> ```bash
+> chmod +x ~/.claude/plugins/cache/ingram-technologies/claude-office/1.0.1/hooks/*
+> ```
+>
+> Then restart Claude Code. The hooks will fire correctly on the next session.
 
 ---
 
@@ -67,7 +78,7 @@ Let it make the edit. Then **end the session** (close Claude Code or start a fre
 Now turn that raw activity into synthesized state:
 
 ```bash
-/aggregate
+/claude-office:aggregate
 ```
 
 > 🔍 **Witness (Chunk 4 — The Value Loop, part 1):** check the project's `status.md` in the vault. Your activity has been parsed into a per-person "Team Notes" section. Raw logs became structured state.
@@ -75,7 +86,7 @@ Now turn that raw activity into synthesized state:
 Then ask for it back:
 
 ```bash
-/check-in
+/claude-office:check-in
 ```
 
 > 🔍 **Witness (Chunk 4 — The Value Loop, part 2):** Claude Code hands you a briefing — what you last did, what's in progress. This is the payoff: the loop closed, and context came *back* to you.
@@ -122,9 +133,9 @@ You've run the full loop end-to-end with zero risk. You now know, from having se
 - where the vault lives and what it contains
 - that your repos stay clean
 - that the hooks need a session restart to wake up
-- what `/aggregate` and `/check-in` actually produce
+- what `/claude-office:aggregate` and `/claude-office:check-in` actually produce
 
-**Next: Level 2** — repeat this on *one real, low-stakes repo*. Same steps, real work. When `/check-in` saves you from re-reading your own notes, the system has earned its place.
+**Next: Level 2** — repeat this on *one real, low-stakes repo*. Same steps, real work. When `/claude-office:check-in` saves you from re-reading your own notes, the system has earned its place.
 
 ---
 

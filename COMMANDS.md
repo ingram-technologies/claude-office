@@ -10,12 +10,12 @@ Full reference for all claude-office commands, hooks, and local state.
 
 | Command | When to use | What it does |
 |---|---|---|
-| `/check-in` | Start of any session | Reads your `@name` subsection from each project's Team Notes — recaps last work, shows todos, stamps your profile |
-| `/aggregate` | Daily (or on-demand) | Parses all `team/*/activity/*.md` logs + git diffs, writes per-person Team Notes into each project's `status.md` |
-| `/retro` | Weekly | Cross-project synthesis — team velocity, collaboration health, strategic observations |
-| `/init` | First time, per repo | Clones the vault template, sets up Obsidian config, saves your identity, optionally creates a GitHub repo |
-| `/setup-identity` | After `/init`, or to reconfigure | Fills out your profile in the vault |
-| `/import-activity` | When onboarding mid-project | Selectively imports past activity into `team/<you>/activity.md`. Run bare to see options. |
+| `/claude-office:check-in` | Start of any session | Reads your `@name` subsection from each project's Team Notes — recaps last work, shows todos, stamps your profile |
+| `/claude-office:aggregate` | Daily (or on-demand) | Parses all `team/*/activity/*.md` logs + git diffs, writes per-person Team Notes into each project's `status.md` |
+| `/claude-office:retro` | Weekly | Cross-project synthesis — team velocity, collaboration health, strategic observations |
+| `/claude-office:init` | First time, per repo | Clones the vault template, sets up Obsidian config, saves your identity, optionally creates a GitHub repo |
+| `/claude-office:setup-identity` | After `/claude-office:init`, or to reconfigure | Fills out your profile in the vault |
+| `/claude-office:import-activity` | When onboarding mid-project | Selectively imports past activity into `team/<you>/activity.md`. Run bare to see options. |
 
 ---
 
@@ -39,23 +39,23 @@ session-end (automatic)
   writes: team/<you>/activity/activity.md — session logs from work in external repos
       │
       ▼
-/aggregate (daily, scheduled)
+/claude-office:aggregate (daily, scheduled)
   reads:  team/*/activity/*.md logs (primary) + git history + project docs
   writes: ## Team Notes with per-person subsections into each project's status.md
       │
       ▼
-/check-in (per person, on demand)
+/claude-office:check-in (per person, on demand)
   reads:  your @name subsection from each project's Team Notes
   writes: "Last checked in" line in your profile.md
   output: personalized briefing — last work, priorities, coordination, todos
       │
       ▼
-/retro (weekly, scheduled)
+/claude-office:retro (weekly, scheduled)
   reads:  aggregated project status files + activity patterns + git stats
   writes: weekly report with cross-project team analysis
 ```
 
-**Aggregate vs retro:** `/aggregate` is the operational data pipeline (daily, per-project). `/retro` is the strategic synthesis (weekly, cross-project). They are separate by design.
+**Aggregate vs retro:** `/claude-office:aggregate` is the operational data pipeline (daily, per-project). `/claude-office:retro` is the strategic synthesis (weekly, cross-project). They are separate by design.
 
 ---
 
@@ -67,5 +67,5 @@ Stored in `~/.claude-office/` on each machine. Never committed to git.
 |---|---|
 | `identity.json` | Your name and vault path |
 | `aggregation-state.json` | Last commit SHA for incremental diff detection |
-| `logs/daily-aggregation.log` | Run history for debugging `/aggregate` |
-| `logs/retro.log` | Run history for debugging `/retro` |
+| `logs/daily-aggregation.log` | Run history for debugging `/claude-office:aggregate` |
+| `logs/retro.log` | Run history for debugging `/claude-office:retro` |

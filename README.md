@@ -4,92 +4,122 @@ Claude Code plugin for the Ingram Office Obsidian vault — a central documentat
 
 Task tracking happens in GitHub. This plugin handles doc sync, change visibility, and coordination.
 
+---
+
+## The Mental Model
+
+> Read this before touching a single command. It takes 2 minutes and makes everything else obvious.
+
+claude-office is not a standalone app. It is a **layer that lives inside your Claude Code sessions** — invisible when things are working, powerful when you look at the output.
+
+There are exactly 4 things to hold in your head.
+
+![Stage 0 diagram](img/stage0.png)
+
+### 1 — The Hub
+
+One shared git repo. Everyone on the team clones it. Obsidian is just the viewer on top of it — nothing lives there that you type manually.
+
+Inside the vault, two kinds of files matter:
+
+- `team/<you>/activity.md` — your session logs
+- `projects/*/status.md` — synthesized project state
+
+Think of it as **mission control**.
+
+### 2 — Your Repos
+
+They stay exactly where they are. You keep working normally in Claude Code. Nothing moves, nothing gets restructured.
+
+The plugin lurk your sessions from the outside. Your repos are the **spokes**; the vault is the **hub**.
+
+```
+vault/                  ← the hub (its own repo, shared)
+  team/nicolas/
+  projects/my-app/
+my-app/                 ← a spoke (your normal repo, untouched)
+other-project/          ← another spoke
+```
+
+### 3 — The Hooks
+
+Two shell scripts fire automatically at the edges of every session. You never trigger them manually.
+
+| Hook | When | What it does |
+|---|---|---|
+| `session-start` | When you open Claude Code | Git pulls the vault, injects your identity + open todos |
+| `session-end` | When you close Claude Code | Parses the conversation transcript, writes your activity to `team/<you>/activity.md` |
+
+They are deterministic shell scripts — no AI, no surprises, no context waste. They only inject metadata (counts, not raw file content) to prevent prompt injection.
+
+> **One important detail:** hooks activate only after you restart your session post-install.
+
+### 4 — The Value Loop
+
+Every day, this cycle runs and builds the shared team memory:
+
+```
+activity logs  →  /aggregate  →  status.md files  →  /check-in  →  YOU (next session)
+   (amber)         (glue cmd)       (in the vault)     (on-demand)     (briefed & ready)
+```
+
+- **`/aggregate`** — parses all `team/*/activity.md` logs, writes per-person summaries into each project's `status.md`. Run daily (or schedule it).
+- **`/check-in`** — reads your subsection from each project's status, hands you back a personalized briefing: last work, priorities, what changed while you were away.
+- **`/retro`** — weekly synthesis across all projects, for strategic perspective.
+
+The loop means that the longer the team uses it, the richer the context becomes.
+
+---
+
+*Now you have the map. Every command in the Setup section below has a logical home in this model.*
+
+---
+
 ## Setup
 
-1. To install the plugin in Claude Code, run `/plugin marketplace add ingram-technologies/claude-office` then `/plugin install ingram-technologies@claude-office` (we recommend activating it for specific repositories instead of account wide)
-2. Run `/init your-name /path/to/vault` — clones the vault template, sets up Obsidian config, and saves your basic identity. Optionally creates a GitHub repo via `gh` CLI.
-3. Run `/setup-identity your-name /path/to/vault` to fill out your profile, you can run the command bare too.
-4. Restart your session — hooks will activate automatically and store what you do in `team/<you>/activity/activity-<project-name>.md` when the plugin is active 
-5. You can use `/check-in` to get context on your projects, and `/import-activity` to add past activity to `team/<you>/activity/activity.md` in a selective way
-6. Use `/aggregate` for daily aggregation (works since the last time it ran) and `/retro` to update the documentation to match
+The plugin lives in your **project repos** (the spokes). The vault is set up once and reused everywhere.
 
-## What Happens Automatically
+**Step 1 — Install the plugin** (once per machine)
 
-| Event | Hook | What it does |
-|-------|------|-------------|
-| Session start | `session-start` | Git pull, inject identity + open todo count + recent change alerts |
-| Session end | `session-end` | Log prompts + file changes to `team/<you>/activity/activity.md` (no auto-commit) |
-
-Hooks are shell scripts — deterministic, no context waste. They inject metadata only (counts, never raw file content) to prevent prompt injection.
-
-## Commands
-
-| Command | What it does |
-|---------|-------------|
-| `/check-in` | Resume your session — reads per-person notes from `/aggregate`, recaps last work, shows todos, stamps profile |
-| `/aggregate` | Parse activity logs in `team/*/activity/` + git diffs, write per-person Team Notes into each project's status.md (daily scheduled) |
-| `/retro` | Weekly cross-project synthesis — team velocity, collaboration health, strategic observations (weekly scheduled) |
-| `/init` | First-time setup — clone the vault template, set up Obsidian config, save identity, optionally create GitHub repo |
-| `/setup-identity` | Fill out your profile (run after `/init`, or to reconfigure) |
-| `/import-activity` | Import previous activity on various projects, you can either enter the command without arguments to see your options or specify |
-
-## Architecture
-
-```
-hooks/
-  session-start     — git pull, inject identity + counts (deterministic)
-  session-end       — parse transcript, log prompts + changes to team/<you>/activity/activity.md (no auto-commit)
-commands/
-  *.md              — slash commands (self-contained instruction files)
+```bash
+/plugin marketplace add ingram-technologies/claude-office
+/plugin install ingram-technologies@claude-office
 ```
 
-### Data Flow
+We recommend activating it per repository rather than account-wide.
 
-```
-session-end (automatic)
-  writes: team/<you>/activity/activity.md — session logs from work in external repos
-      │
-      ▼
-/aggregate (daily, scheduled)
-  reads: team/*/activity/*.md logs (primary) + git history + project docs
-  writes: ## Team Notes with per-person subsections into each project
-      │
-      ▼
-/check-in (per person, on demand)
-  reads: your @name subsection from each project's Team Notes
-  outputs: personalized briefing (last work, priorities, coordination, todos)
-  writes: "Last checked in" line in your profile.md
-      │
-      ▼
-/retro (weekly, scheduled)
-  reads: aggregated project status files + activity patterns from team/*/activity/*.md + git stats
-  writes: weekly report with cross-project team analysis
+**Step 2 — Initialize a project repo** (once per spoke)
+
+```bash
+/init your-name /path/to/vault
 ```
 
-## Design Decisions
+Clones the vault template if it doesn't exist, sets up Obsidian config, saves your identity. Pass `--create-repo` to create the vault GitHub repo via `gh` CLI.
 
-- **Activity log captures intent** — session-end extracts user prompts from the conversation transcript into `team/<you>/activity/activity*.md`
-- **Activity logs are the primary lens** — aggregate parses session logs to see work in external repos, not just vault edits
-- **Hooks for deterministic work** — pull on start, log on end, commit/push is manual
-- **Metadata injection only** — hooks never inject raw file content into context (prompt injection prevention)
-- **Writer/reader chain** — session-end → team/<you>/activity/*.md → aggregate → project files → check-in / retro
-- **Aggregate vs retro** — aggregate is the operational data pipeline (daily, per-project), retro is the strategic synthesis (weekly, cross-project)
-- **Session-end scoped to user** — only commits `team/<you>/`, never other folders
-- **Incremental aggregation** — git-diff change detection, only rebuilds affected projects
-- **task.md is personal** — your own todo list, not a team-managed task system
+**Step 3 — Fill out your profile**
 
-## Local State
+```bash
+/setup-identity your-name /path/to/vault
+```
 
-Stored in `~/.claude-office/` (never committed to git):
+Run it bare (`/setup-identity`) to reconfigure at any time.
 
-| File | Purpose |
-|------|---------|
-| `identity.json` | Your name and vault path |
-| `aggregation-state.json` | Last commit SHA for incremental diff detection |
-| `logs/daily-aggregation.log` | Run history for debugging |
-| `logs/retro.log` | Run history for debugging |
+**Step 4 — Restart your session**
 
-## Recommendation
+Hooks activate on the next session start. From here, everything runs automatically.
 
-We recommend using the obsidian web clipper extension to easily add web pages to your various projects.
+**Step 5 — Orient yourself**
 
+```bash
+/check-in
+```
+
+Gets you up to speed on all active projects. Run this at the start of any session.
+
+> **First time?** Run through the [Level 1 dry-run](TUTORIAL_LEVEL_1.md) in a throwaway sandbox before pointing this at a real project. Takes 20 minutes and confirms the mental model by experience.
+
+---
+
+→ [Command reference](COMMANDS.md) — full list of commands, hooks, and local state
+→ [Architecture & design decisions](ARCHITECTURE.md) — how it works under the hood
+→ [Integrations](INTEGRATIONS.md) — pairing with structural or fact-memory tools (graphify, supermemory, and a rubric for others)

@@ -31,7 +31,7 @@ skills/
 `/aggregate` reads session logs to understand work done in *external repos*, not just edits to the vault itself. The vault is the output, not the input.
 
 **Hooks for deterministic work.**  
-Hooks are shell scripts, not AI calls. Pull on start, log on end, commit/push is always manual. This keeps the automatic layer predictable and fast, with zero token cost.
+Hooks are shell scripts, not AI calls. Pull on start, log on end, commit/push is always manual. This keeps the automatic layer predictable and fast, with zero token cost and avoids damaging the AI's capabilities with extra context.
 
 **node is the one guaranteed dependency.**  
 Hooks parse JSON and conversation transcripts with `node`, never python. Claude Code is itself a Node.js app, so node is present on every machine that can run a hook — whereas python3 is often absent (notably on Windows). Treating node as a hard dependency is *more* portable than a python fallback, not less. Both hooks bail cleanly if node is somehow missing.

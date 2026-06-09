@@ -6,13 +6,11 @@ claude-office is one *kind* of memory: **episodic** — the time-ordered narrati
 
 ---
 
-## The Pattern: Memory as a Swappable Layer
+## How claude office handles your external project memory for all users
 
-claude-office does not own "memory" — it owns *one layer of it*. Other layers can plug in alongside it, as long as they speak a shared protocol (today, that protocol is **MCP** and **git-synced files**).
+claude-office is the memory of how the project is handled from a higher, more long term perspective than what a single project having documentation can do. It is connected to the vault to store information there and make a team work together on multiple projects at the same time whilst keeping an overview about all of it that only has the relevant information and actually gets updated.
 
-Think of it like membranes and signals: each memory tool is its own organ, and they communicate through standard channels rather than being fused together. Swap one out, the others keep working.
-
-This means you should treat every new memory tool you encounter not as "the memory system" but as **a candidate layer** with a specific job. The question is never "should I replace claude-office?" — it's "what layer is this, and does it compose cleanly?"
+This is a tool to make a team work together whilst keeping independence, and also allowing better overview of the real usefulness of your various AI projects.
 
 ---
 

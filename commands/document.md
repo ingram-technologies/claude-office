@@ -116,7 +116,7 @@ Ask these explicitly:
 
 If they want spotlight sections, ask what to emphasize (for example: auth flow, data layer, API boundaries, deployment path, performance-critical paths, legacy hotspots). If they do not specify, pick 3-5 based on evidence and label them as AI-selected.
 
-### Format your message in a similar way, but DO NOT copy this directly:
+### Example, format your message in a similar way, but DO NOT copy this directly, adapt it to the user's circumstances:
 
 ---
 **Project:** `<PROJECT_NAME>` (`<primary language>`)
@@ -133,7 +133,7 @@ If they want spotlight sections, ask what to emphasize (for example: auth flow, 
 | `architecture.md` | Components, data flow, non-obvious design choices |
 | `decisions.md` | Key decisions extracted from git commits and session prompts |
 | `status.md` | SWOT-style assessment: strengths, weaknesses, current direction, what matters now |
-| `codebase.html` | Interactive file map with annotations, color-coded by role |
+| `codebase.html` | Interactive file map with annotations, color-coded by role, and important element overviews |
 
 **Skipped (insufficient signal):**
 - `roadmap.md` — no roadmap signals found; add manually if you have one

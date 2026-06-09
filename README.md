@@ -10,7 +10,7 @@ Task tracking happens in GitHub. This plugin handles doc sync, change visibility
 
 > Read this before touching a single command. It takes 2 minutes and makes everything else obvious.
 
-claude-office is not a standalone app. It is a **layer that lives inside your Claude Code sessions** — invisible when things are working, powerful when you look at the output.
+claude-office is not a standalone app. It is a **layer that lives inside your Claude Code sessions** — invisible when things are working, powerful when you look at the output. It comes with a skill that makes claude aware of the presence of the vault and how to consciously deal with it when required, and useful commands for documentation and working together on a project.
 
 There are exactly 4 things to hold in your head.
 

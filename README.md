@@ -56,7 +56,7 @@ They are deterministic shell scripts — no AI, no surprises, no context waste. 
 
 ### 4 — The Value Loop
 
-Every day, this cycle runs and builds the shared team memory:
+This is the cycle you can run to build the shared team memory, the rate at which you need to run this depends on you, but you can automate it to run bidaily or else, as relevant (just don't let it be something that runs in the background for no one to use, the intention is that this is what you look at during your meetings):
 
 ```
 activity logs  →  /claude-office:aggregate  →  status.md files  →  /claude-office:check-in  →  YOU (next session)

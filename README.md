@@ -63,7 +63,7 @@ activity logs  →  /claude-office:aggregate  →  status.md files  →  /claude
    (amber)         (glue cmd)       (in the vault)     (on-demand)     (briefed & ready)
 ```
 
-- **`/claude-office:aggregate`** — parses all activity logs, writes per-person summaries into each project's `status.md`. Run daily.
+- **`/claude-office:aggregate`** — parses all activity logs, writes per-person summaries into each project's `status.md`. Run daily, or less often. Only one person has to run this.
 - **`/claude-office:check-in`** — reads your subsection from each project's status, hands you back a personalized briefing.
 - **`/claude-office:retro`** — weekly synthesis across all projects, for strategic perspective.
 

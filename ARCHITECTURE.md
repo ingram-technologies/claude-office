@@ -33,6 +33,12 @@ skills/
 **Hooks for deterministic work.**  
 Hooks are shell scripts, not AI calls. Pull on start, log on end, commit/push is always manual. This keeps the automatic layer predictable and fast, with zero token cost.
 
+**node is the one guaranteed dependency.**  
+Hooks parse JSON and conversation transcripts with `node`, never python. Claude Code is itself a Node.js app, so node is present on every machine that can run a hook — whereas python3 is often absent (notably on Windows). Treating node as a hard dependency is *more* portable than a python fallback, not less. Both hooks bail cleanly if node is somehow missing.
+
+**Scripts stay POSIX-portable.**  
+Hooks run on Linux, macOS (BSD coreutils, bash 3.2), and Git Bash on Windows. They avoid GNU-only flags (`sed -i`, `grep -P`, `readlink -f`, `date -d`) and are pinned to LF line endings via `.gitattributes` — CRLF would break them under Git Bash (`$'\r': command not found`). The `run-hook.cmd` polyglot wrapper lets the same entry point work from cmd.exe and from a Unix shell.
+
 **Metadata injection only.**  
 Hooks never inject raw file content into the Claude context window — only counts and summaries. This prevents prompt injection attacks from vault content.
 

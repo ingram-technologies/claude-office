@@ -22,7 +22,7 @@ One shared git repo. Everyone on the team clones it. Obsidian is just the viewer
 
 Inside the vault, two kinds of files matter:
 
-- `team/<you>/activity.md` — your session logs
+- `team/<you>/activity/` — your per-repo session logs
 - `projects/*/status.md` — synthesized project state
 
 Think of it as **mission control**.
@@ -48,7 +48,7 @@ Two shell scripts fire automatically at the edges of every session. You never tr
 | Hook | When | What it does |
 |---|---|---|
 | `session-start` | When you open Claude Code | Git pulls the vault, injects your identity + open todos |
-| `session-end` | When you close Claude Code | Parses the conversation transcript, writes your activity to `team/<you>/activity.md` |
+| `session-end` | When you close Claude Code | Parses the conversation transcript, writes your activity to `team/<you>/activity/` |
 
 They are deterministic shell scripts — no AI, no surprises, no context waste. They only inject metadata (counts, not raw file content) to prevent prompt injection.
 

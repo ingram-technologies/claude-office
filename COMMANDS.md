@@ -15,7 +15,7 @@ Full reference for all claude-office commands, hooks, and local state.
 | `/claude-office:retro` | Weekly | Cross-project synthesis — team velocity, collaboration health, strategic observations |
 | `/claude-office:init` | First time, per repo | Clones the vault template, sets up Obsidian config, saves your identity, optionally creates a GitHub repo |
 | `/claude-office:setup-identity` | After `/claude-office:init`, or to reconfigure | Fills out your profile in the vault |
-| `/claude-office:import-activity` | When onboarding mid-project | Selectively imports past activity into `team/<you>/activity.md`. Run bare to see options. |
+| `/claude-office:import-activity` | When onboarding mid-project | Selectively imports past activity into `team/<you>/activity/`. Run bare to see options. |
 
 ---
 

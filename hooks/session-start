@@ -33,8 +33,8 @@ else
       others_changed=$(git log --since="24 hours ago" --name-only --pretty=format:"%an" -- 'team/' 'projects/' 2>/dev/null | grep -v "^$" | head -50 | wc -l | tr -d ' ' || echo "0")
     fi
 
-    # Check if personal task.md exists and has items
-    task_file="$VAULT/team/$NAME/task.md"
+    # Check if personal tasks.md exists and has items
+    task_file="$VAULT/team/$NAME/tasks.md"
     task_count=0
     if [ -f "$task_file" ]; then
       task_count=$(grep -cE '^\s*- \[ \]' "$task_file" 2>/dev/null || echo "0")
@@ -47,7 +47,7 @@ else
     summary="$summary\nAvailable commands: /check-in, /aggregate, /retro, /setup-identity, /import-activity"
     summary="$summary\n**Vault awareness**: Use the \`vault-awareness\` skill to understand the vault structure and find relevant docs."
 
-    [ "$task_count" -gt 0 ] && summary="$summary\n- **$task_count open todo(s)** in your task.md"
+    [ "$task_count" -gt 0 ] && summary="$summary\n- **$task_count open todo(s)** in your tasks.md"
     [ "$others_changed" -gt 0 ] && summary="$summary\n- **Docs changed in last 24h** — run /check-in for details"
 
     summary="$summary\n</claude-office-session>"

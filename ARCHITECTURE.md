@@ -42,7 +42,7 @@ Hooks never inject raw file content into the Claude context window — only coun
 **Session-end is scoped to the user.**  
 `session-end` only ever writes to `team/<you>/`. It cannot touch other team members' folders, even if their names appear in the conversation.
 
-**`task.md` is personal.**  
+**`tasks.md` is personal.**  
 Your todo list lives in your own section of the vault. It is not a team-managed task system. Team coordination happens through GitHub Issues, not through the vault.
 
 **Writer/reader chain is one-directional.**

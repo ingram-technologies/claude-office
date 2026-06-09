@@ -86,7 +86,7 @@ The plugin lives in your **project repos** (the spokes). The vault is set up onc
 /plugin install claude-office@ingram-technologies
 ```
 
-We recommend activating it per repository rather than account-wide.
+It is up to you whether you want to activate it account wide to see all activities, or per repository. Nothing gets automatically commited or pushed to the repo, and the activity of different project sits in different activity.md files, giving a clear overview and keeping the intention in this.
 
 **Step 2 — Initialize a project repo** (once per spoke)
 

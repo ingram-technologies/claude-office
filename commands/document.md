@@ -162,10 +162,11 @@ Then ask:
 **Wait for the user's response.** Apply any changes to the file list. If they say "go ahead" or equivalent, proceed with the proposed list. Note their choice on update vs. regenerate if vault docs exist.
 
 If the user does not provide `codebase.html` preferences, use defaults and state them before generation:
-- style: dashboard-heavy, readable
-- density: medium
+- style: dashboard-heavy, readable, follow the style of their website
+- density: medium, include multiple pages if it's a big project
 - tone: technical with brief executive context
 - spotlight segments: enabled (AI-selected, evidence-based)
+Be very creative with the codebase.html and best adapt it to the project to make something very useful for anyone working on the project to get a clear overview. Don't simply follow the instructions, you're an advanced AI you can do better than a template, extra elements than code file overviews are the potatoes that go with it.
 
 ## Phase 2: Deep Exploration + Generation
 

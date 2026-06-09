@@ -108,7 +108,7 @@ Run it bare (`/claude-office:setup-identity`) to reconfigure at any time.
 
 Hooks activate on the next session start. From here, everything runs automatically.
 
-> **Permission error on hooks?** Run `chmod +x ~/.claude/plugins/cache/ingram-technologies/claude-office/1.0.1/hooks/*` then restart.
+> **Permission error on hooks?** The hooks ship with the executable bit set, so this should not happen. If it does (e.g. an unusual checkout), run `chmod +x ~/.claude/plugins/cache/ingram-technologies/claude-office/*/hooks/*` then restart. Hooks require `node` on PATH (guaranteed wherever Claude Code runs) and use LF line endings — on Windows run them via Git Bash.
 
 **Step 5 — Orient yourself**
 

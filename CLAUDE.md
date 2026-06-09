@@ -42,7 +42,7 @@ Each stage reads only the previous stage's output.
 ## Working on Hooks
 
 - Test a hook directly: `echo '{}' | bash hooks/session-start` (reads identity from `~/.claude-office/identity.json`; Stop-hook reads JSON from stdin).
-- Hooks use `set -euo pipefail` and fall back to `node` then `python3` for JSON parsing — keep both paths working.
+- Hooks use `set -euo pipefail` and require **`node`** for all JSON/transcript parsing. node is guaranteed present wherever Claude Code runs, so it is a hard dependency (no python fallback); both hooks bail cleanly if node is missing. Keep scripts portable: LF line endings only (enforced by `.gitattributes`), and avoid GNU-only flags (`sed -i`, `grep -P`, `readlink -f`, `date -d`) so they work on Linux, macOS (BSD coreutils), and Git Bash on Windows.
 - The vault structure that hooks and the skill assume is documented in `skills/vault-awareness/SKILL.md`.
 
 ## Docs Map

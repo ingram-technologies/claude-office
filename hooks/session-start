@@ -4,6 +4,12 @@
 
 set -euo pipefail
 
+# node is required and is guaranteed present wherever Claude Code runs.
+if ! command -v node >/dev/null 2>&1; then
+  printf '{\n  "hookSpecificOutput": {\n    "hookEventName": "SessionStart",\n    "additionalContext": "claude-office: node not found on PATH — session hooks are disabled until node is installed."\n  }\n}\n'
+  exit 0
+fi
+
 IDENTITY_FILE="$HOME/.claude-office/identity.json"
 
 if [ ! -f "$IDENTITY_FILE" ]; then
@@ -12,7 +18,6 @@ else
   parse_json() {
     local file="$1" key="$2"
     node -e "console.log(JSON.parse(require('fs').readFileSync('$file','utf8'))['$key'])" 2>/dev/null \
-      || python3 -c "import json,sys; print(json.load(open(sys.argv[1]))['$key'])" "$file" 2>/dev/null \
       || echo ""
   }
 
@@ -37,7 +42,8 @@ else
     task_file="$VAULT/team/$NAME/tasks.md"
     task_count=0
     if [ -f "$task_file" ]; then
-      task_count=$(grep -cE '^\s*- \[ \]' "$task_file" 2>/dev/null || echo "0")
+      task_count=$(grep -cE '^[[:space:]]*- \[ \]' "$task_file" 2>/dev/null || true)
+      [ -z "$task_count" ] && task_count=0
     fi
 
     # Build context

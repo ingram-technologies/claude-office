@@ -5,6 +5,10 @@
 
 set -euo pipefail
 
+# node is required (transcript parsing below is node-only) and is guaranteed
+# present wherever Claude Code runs. Bail silently if it is somehow missing.
+command -v node >/dev/null 2>&1 || exit 0
+
 IDENTITY_FILE="$HOME/.claude-office/identity.json"
 STATE_FILE="$HOME/.claude-office/last-session-state.json"
 
@@ -13,7 +17,6 @@ STATE_FILE="$HOME/.claude-office/last-session-state.json"
 parse_json() {
   local file="$1" key="$2"
   node -e "console.log(JSON.parse(require('fs').readFileSync('$file','utf8'))['$key'])" 2>/dev/null \
-    || python3 -c "import json,sys; print(json.load(open(sys.argv[1]))['$key'])" "$file" 2>/dev/null \
     || echo ""
 }
 

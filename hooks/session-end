@@ -9,6 +9,11 @@ set -euo pipefail
 # present wherever Claude Code runs. Bail silently if it is somehow missing.
 command -v node >/dev/null 2>&1 || exit 0
 
+# Capture stdin FIRST — node -e calls below consume stdin, which would
+# swallow the Stop hook payload (transcript_path, session_id) sent by
+# Claude Code before we get a chance to read it.
+hook_input=$(cat)
+
 IDENTITY_FILE="$HOME/.claude-office/identity.json"
 STATE_FILE="$HOME/.claude-office/last-session-state.json"
 
@@ -30,9 +35,6 @@ member_dir="$VAULT/team/$NAME"
 
 activity_dir="$member_dir/activity"
 mkdir -p "$activity_dir"
-
-# Read Stop hook stdin for session info
-hook_input=$(cat)
 transcript_path=""
 session_id=""
 if [ -n "$hook_input" ]; then
@@ -172,7 +174,7 @@ if [ -n "$transcript_path" ] && [ -f "$transcript_path" ]; then
 
     // Build file list from tool_use data (files actually edited in session)
     const sessionFiles=[...editedFiles].sort().slice(0,10);
-    const sessionFileStr=sessionFiles.join(', ');
+    let sessionFileStr=sessionFiles.join(', ');
     if(editedFiles.size>10) sessionFileStr+=' (+'+(editedFiles.size-10)+' more)';
 
     // Output structured lines

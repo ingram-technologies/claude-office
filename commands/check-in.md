@@ -61,7 +61,7 @@ Update the project focus in profile.md if it changed.
 
 ### 6. Review Your Todos
 
-Read `/team/<identity>/task.md` and list open items. Highlight any that relate to today's focus project.
+Read `/team/<identity>/tasks.md` and list open items. Highlight any that relate to today's focus project.
 
 ### 7. Output
 
@@ -91,7 +91,7 @@ Read `/team/<identity>/task.md` and list open items. Highlight any that relate t
 [Only include projects where you have notes or recent commits]
 
 ### Your Todos
-[Open items from task.md, focus-project items first]
+[Open items from tasks.md, focus-project items first]
 
 ### Checked In
 Marked as checked in for: [project list]

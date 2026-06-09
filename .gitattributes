@@ -1,0 +1,9 @@
+# Normalize text, but pin hook line endings explicitly.
+# Bash scripts MUST stay LF — CRLF breaks them under Git Bash on Windows
+# (e.g. "$'\r': command not found"). run-hook.cmd stays LF too; modern
+# cmd.exe tolerates LF, and the file's Unix half is read by /bin/sh.
+* text=auto
+
+hooks/session-start  text eol=lf
+hooks/session-end    text eol=lf
+hooks/run-hook.cmd   text eol=lf

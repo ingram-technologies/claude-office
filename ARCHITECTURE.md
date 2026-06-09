@@ -25,7 +25,7 @@ skills/
 ## Key Design Decisions
 
 **Activity log captures intent, not just output.**  
-`session-end` extracts user *prompts* from the conversation transcript — what you were trying to do — not just which files changed. This makes the logs meaningful context for future sessions, not just a diff.
+`session-end` extracts user *prompts* from the conversation transcript — what you were trying to do — not just which files changed. This makes the logs meaningful context for future sessions, not just a diff redundant to the github history.
 
 **Activity logs are the primary lens.**  
 `/aggregate` reads session logs to understand work done in *external repos*, not just edits to the vault itself. The vault is the output, not the input.

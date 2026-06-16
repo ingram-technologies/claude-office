@@ -116,7 +116,7 @@ Ask these explicitly:
 
 If they want spotlight sections, ask what to emphasize (for example: auth flow, data layer, API boundaries, deployment path, performance-critical paths, legacy hotspots). If they do not specify, pick 3-5 based on evidence and label them as AI-selected.
 
-### Format your message in a similar way, but DO NOT copy this directly:
+### Example, format your message in a similar way, but DO NOT copy this directly, adapt it to the user's circumstances:
 
 ---
 **Project:** `<PROJECT_NAME>` (`<primary language>`)
@@ -133,7 +133,7 @@ If they want spotlight sections, ask what to emphasize (for example: auth flow, 
 | `architecture.md` | Components, data flow, non-obvious design choices |
 | `decisions.md` | Key decisions extracted from git commits and session prompts |
 | `status.md` | SWOT-style assessment: strengths, weaknesses, current direction, what matters now |
-| `codebase.html` | Interactive file map with annotations, color-coded by role |
+| `codebase.html` | Interactive file map with annotations, color-coded by role, and important element overviews |
 
 **Skipped (insufficient signal):**
 - `roadmap.md` — no roadmap signals found; add manually if you have one
@@ -162,10 +162,11 @@ Then ask:
 **Wait for the user's response.** Apply any changes to the file list. If they say "go ahead" or equivalent, proceed with the proposed list. Note their choice on update vs. regenerate if vault docs exist.
 
 If the user does not provide `codebase.html` preferences, use defaults and state them before generation:
-- style: dashboard-heavy, readable
-- density: medium
+- style: dashboard-heavy, readable, follow the style of their website
+- density: medium, include multiple pages if it's a big project
 - tone: technical with brief executive context
 - spotlight segments: enabled (AI-selected, evidence-based)
+Be very creative with the codebase.html and best adapt it to the project to make something very useful for anyone working on the project to get a clear overview. Don't simply follow the instructions, you're an advanced AI you can do better than a template, extra elements than code file overviews are the potatoes that go with it.
 
 ## Phase 2: Deep Exploration + Generation
 

@@ -62,6 +62,12 @@ Running `/init` clones from [ingram-technologies/claude-office-vault](https://gi
 
 ---
 
-## Recommendation
+## Recommendations
 
 We recommend the [Obsidian Web Clipper](https://obsidian.md/clipper) extension for easily adding web pages and research to your project folders in the vault.
+
+We recommend adding the [Obsidian Skills Plugin](https://github.com/kepano/obsidian-skills) to make claude better able to interact with obsidian (made by kephano himself)
+
+A mention of honor goes to the [caveman](https://github.com/juliusbrussee/caveman) skill in order to save tokens if you don't need wordy descriptions.
+
+Finally, [graphify](https://graphify.net/) is a good tool to help AI understand your graph, [playwright](https://playwright.dev/) to give AI better testing abilities and don't forget to use a memory system like [supermemory](https://supermemory.ai/) or even [arcscontexta](https://www.arscontexta.org/) if you're experienced with claude code.

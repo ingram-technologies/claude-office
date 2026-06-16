@@ -13,9 +13,9 @@ This is the onboarding command. It sets up identity, fills out the user's profil
 
 If arguments are provided, parse as `<name>` and `<vault-path>`. Otherwise ask:
 - "What's your name?" (must match their folder name in `/team/<name>/`, and the identity name in `identity.json`, case sensitive)
-- "Where is your Ingram Office vault?" (absolute path, e.g., `C:/Users/alex/Documents/ingram-vault`)
+- "Where is your obsidian vault?" (absolute path, e.g., `C:/Users/alex/Documents/ingram-vault`)
 
-**The vault is a separate GitHub repository** (not part of this plugin). It's an Obsidian vault where the team keeps docs, project statuses, and coordination files. It should already contain `CLAUDE.md`, a `/team/` folder, and a `/team/_new_user/` template. If you don't have the vault yet, clone it first and then come back.
+**The vault is a separate GitHub repository** (not part of this plugin). It's an Obsidian vault where the team keeps docs, project statuses, and coordination files. It should already contain `CLAUDE.md`, a `/team/` folder, and a `/team/_new_user/` template. If you don't have the vault yet, direct the user to set it up with the init command first.
 
 Create `~/.claude-office/` and `~/.claude-office/logs/` if they don't exist.
 
@@ -37,6 +37,9 @@ mkdir -p "<vault-path>/team/<name>/activity"
 Make sure the hooks are allowed with chmod if on mac/linux.
 
 ## Step 2: Fill Out Profile (Progressive)
+
+First inform the user they can give their github, linkedin or any other existing profile with information on them to populate the vault as much as possible automatically, or do it manually. If they give it, read as much as you can and also extract a picture of them to add to the vault.
+Also tell them to drop their https://www.manualof.me/ if they have one, to add to their profile, and highly suggest to make one. This is for close team cooperation, the github vault stays private, but this information is crucial for working together. Do not ask any following question for which you already have the answer from these sources.
 
 Read `/team/<name>/profile.md`. Walk the user through each section below. **After each section, write the answers into profile.md immediately** before moving to the next section.
 

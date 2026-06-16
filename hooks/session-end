@@ -16,6 +16,9 @@ hook_input=$(cat)
 
 IDENTITY_FILE="$HOME/.claude-office/identity.json"
 STATE_FILE="$HOME/.claude-office/last-session-state.json"
+# Shared exclusion pattern for the activity log itself — used by both the
+# bash grep filters below and the JS edited-files filter, kept in sync here.
+ACTIVITY_FILE_REGEX='activity(-.*)?\.md'
 
 [ ! -f "$IDENTITY_FILE" ] && exit 0
 
@@ -86,6 +89,7 @@ if [ -n "$transcript_path" ] && [ -f "$transcript_path" ]; then
     const prevSession=process.argv[2]||'';
     const prevCount=parseInt(process.argv[3]||'0',10);
     const curSession=process.argv[4]||'';
+    const activityFileRegex=new RegExp('^'+(process.argv[5]||'activity(-.*)?\\.md')+'$');
 
     // Same session as last write? Only process new messages
     const sameSession=(prevSession===curSession && curSession!=='');
@@ -141,7 +145,7 @@ if [ -n "$transcript_path" ] && [ -f "$transcript_path" ]; then
                 if(fp && (b.name==='Edit'||b.name==='Write'||b.name==='MultiEdit')){
                   // Extract basename
                   const base=fp.replace(/\\\\/g,'/').split('/').pop();
-                  if(base && !/^activity(-.*)?\.md$/.test(base)) editedFiles.add(base);
+                  if(base && !activityFileRegex.test(base)) editedFiles.add(base);
                 }
               }
             }
@@ -194,7 +198,7 @@ if [ -n "$transcript_path" ] && [ -f "$transcript_path" ]; then
     if(toolSummary) console.log('TOOLS::'+toolSummary);
     if(tokensOut>0) console.log('TOKENS::'+tokensIn+'in/'+tokensOut+'out');
     if(sessionFileStr) console.log('SESSION_FILES::'+sessionFileStr);
-  " "$transcript_path" "$prev_session" "$prev_msg_count" "$session_id" 2>/dev/null || echo "")
+  " "$transcript_path" "$prev_session" "$prev_msg_count" "$session_id" "$ACTIVITY_FILE_REGEX" 2>/dev/null || echo "")
 fi
 
 # Check if we should skip (no new messages)
@@ -220,11 +224,15 @@ else
   activity_file="$activity_dir/activity.md"
 fi
 
-cd "$VAULT" || exit 0
-
-# Also check git for uncommitted changes (complementary to transcript-based files)
-changed_files=$(git diff --name-only HEAD 2>/dev/null | grep -Ev "activity(-.*)?\.md" || true)
-untracked=$(git ls-files --others --exclude-standard 2>/dev/null | grep -Ev "activity(-.*)?\.md" || true)
+# Also check git for uncommitted changes (complementary to transcript-based files).
+# Use `git -C` instead of `cd` so this script's cwd is never touched, and skip
+# both calls entirely if the vault isn't a git repo (avoids two wasted subprocesses).
+changed_files=""
+untracked=""
+if git -C "$VAULT" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  changed_files=$(git -C "$VAULT" diff --name-only HEAD 2>/dev/null | grep -Ev "$ACTIVITY_FILE_REGEX" || true)
+  untracked=$(git -C "$VAULT" ls-files --others --exclude-standard 2>/dev/null | grep -Ev "$ACTIVITY_FILE_REGEX" || true)
+fi
 all_changes=""
 [ -n "$changed_files" ] && all_changes="$changed_files"
 if [ -n "$untracked" ]; then

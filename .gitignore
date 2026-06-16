@@ -17,6 +17,9 @@ desktop.ini
 *.swo
 *~
 
+# graph memory
+graphify-out/
+
 # Environment / secrets
 .env
 .env.*

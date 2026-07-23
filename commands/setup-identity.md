@@ -27,6 +27,18 @@ Write `~/.claude-office/identity.json` if it doesn't already exist:
 }
 ```
 
+Optionally, sessions can be routed into subfolders of `team/<name>/activity/` by working directory —
+add a `routes` map (keys are path prefixes, longest match wins so subfolders inherit, values are
+subfolders under `activity/`). Mention it as a way to keep some logs out of git:
+
+```json
+{
+  "name": "<name>",
+  "vault": "<vault-path>",
+  "routes": { "~/work": "work", "~/private": "personal" }
+}
+```
+
 Verify the vault path exists and contains `CLAUDE.md`. Verify `/team/<name>/` exists. If not, offer to create it from `/team/_new_user/` — copy the folder, replace all `<PUT YOUR NAME HERE>` placeholders with their name.
 
 After the user folder exists (whether just created or pre-existing), always ensure the `activity/` subdirectory exists:
@@ -102,7 +114,7 @@ After setup is complete, give the user a brief orientation:
 > **Your files:**
 > - `team/<name>/profile.md` — your bio (what we just filled out)
 > - `team/<name>/tasks.md` — your personal todo list (only you manage this)
-> - `team/<name>/activity/activity.md` — automatic log of your doc changes (plugin writes this)
+> - `team/<name>/activity/` — automatic log of your sessions, one file per project (plugin writes this). Sessions can be routed into subfolders per working directory via `routes` in `identity.json`, which is handy for gitignoring the ones you don't want to share
 >
 > **Task tracking happens in GitHub** — the vault is for documentation and coordination.
 >

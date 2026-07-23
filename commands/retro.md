@@ -22,7 +22,7 @@ git pull
 For each project in `/projects/`, read `status.md` — especially the `## Team Notes` sections written by `/aggregate`. This is the foundation for "What Happened" — don't re-derive what aggregate already computed.
 
 **Activity log patterns across the team:**
-Read all `team/*/activity/*.md` files for entries from the past 7 days. Extract cross-person patterns:
+Read all `team/*/activity/**/*.md` files for entries from the past 7 days. Extract cross-person patterns:
 - Session volume per person (how many sessions, total duration)
 - Which repos/projects each person worked in
 - Types of work (debugging, features, docs, architecture, etc.)

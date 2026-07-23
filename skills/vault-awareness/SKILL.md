@@ -22,6 +22,7 @@ Use this knowledge to **read relevant docs when they'd help answer a question or
       activity/
         activity.md      # Auto-generated session log (append-only)
         activity-*.md    # Per-project activity logs (default behavior)
+        <route>/         # Optional subfolders, routed by working dir (may be gitignored)
     _new_user/           # Template for onboarding new members
     roster.md            # Dataview query listing all team members
   projects/
@@ -45,7 +46,7 @@ Not every project has every file — check what exists before reading.
 | Information | Where to find it |
 |---|---|
 | Who's on the team, their roles | `team/<name>/profile.md` or `team/roster.md` |
-| What someone's been working on | `team/<name>/activity/*.md` (session logs) |
+| What someone's been working on | `team/<name>/activity/**/*.md` (session logs, incl. routed subfolders) |
 | Someone's open tasks | `team/<name>/tasks.md` |
 | Project overview and current state | `projects/<project>/status.md` |
 | Architecture and technical design | `projects/<project>/architecture.md` |
@@ -68,7 +69,7 @@ Tags are lowercase with `/` hierarchies: `#project/ingram-cloud`, `#topic/securi
 ## When to Use the Vault
 
 - **User asks about a project** — read its `status.md`, `architecture.md`, or `kanban.md`
-- **User asks "what has X been working on"** — read `team/X/activity/*.md` and git log
+- **User asks "what has X been working on"** — read `team/X/activity/**/*.md` and git log
 - **User asks about team structure or roles** — read profiles in `team/`
 - **User asks about a past decision** — check `projects/<project>/decisions.md`
 - **User is working on a project** — read its docs for context before making suggestions

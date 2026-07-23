@@ -28,6 +28,25 @@ parse_json() {
     || echo ""
 }
 
+# Longest matching prefix in identity.json "routes" wins, so subfolders inherit their parent's route.
+# Prints the destination subfolder (relative to the activity dir), or nothing.
+route_subdir() {
+  node -e '
+    const fs=require("fs"),os=require("os");
+    const routes=(JSON.parse(fs.readFileSync(process.argv[1],"utf8")).routes)||{};
+    const cwd=(process.argv[2]||"").replace(/\\/g,"/").replace(/\/+$/,"");
+    let best="",bestLen=-1;
+    for(const [k,v] of Object.entries(routes)){
+      const pre=String(k).replace(/\\/g,"/").replace(/^~/,os.homedir()).replace(/\/+$/,"");
+      if(!pre||(cwd!==pre&&!cwd.startsWith(pre+"/"))) continue;
+      if(pre.length>bestLen){bestLen=pre.length;best=String(v);}
+    }
+    // stay inside the activity dir regardless of what the config says
+    best=best.replace(/\\/g,"/").replace(/^\/+/,"").split("/").filter(s=>s&&s!=="."&&s!=="..").join("/");
+    process.stdout.write(best);
+  ' "$IDENTITY_FILE" "$1" 2>/dev/null || echo ""
+}
+
 NAME=$(parse_json "$IDENTITY_FILE" "name")
 VAULT=$(parse_json "$IDENTITY_FILE" "vault")
 
@@ -37,9 +56,9 @@ member_dir="$VAULT/team/$NAME"
 [ ! -d "$member_dir" ] && exit 0
 
 activity_dir="$member_dir/activity"
-mkdir -p "$activity_dir"
 transcript_path=""
 session_id=""
+cwd_dir="$PWD"
 if [ -n "$hook_input" ]; then
   eval "$(echo "$hook_input" | node -e "
     let d=''; process.stdin.on('data',c=>d+=c); process.stdin.on('end',()=>{
@@ -47,8 +66,10 @@ if [ -n "$hook_input" ]; then
         const o=JSON.parse(d);
         const tp=o.transcript_path||'';
         const si=o.session_id||'';
+        const cw=o.cwd||'';
         console.log('transcript_path=\"'+tp.replace(/\"/g,'')+'\"');
         console.log('session_id=\"'+si.replace(/\"/g,'')+'\"');
+        if(cw) console.log('cwd_dir=\"'+cw.replace(/\"/g,'')+'\"');
       } catch(e) {
         console.log('transcript_path=\"\"');
         console.log('session_id=\"\"');
@@ -102,6 +123,7 @@ if [ -n "$transcript_path" ] && [ -f "$transcript_path" ]; then
     let firstTs='', lastTs='';
     let branch='';
     let repo='';
+    let cwdFull='';
     let entrypoint='';
     let totalMsgs=0;
 
@@ -118,6 +140,7 @@ if [ -n "$transcript_path" ] && [ -f "$transcript_path" ]; then
         // Grab metadata from any message that has it
         if(o.gitBranch && !branch) branch=o.gitBranch;
         if(o.cwd && !repo) repo=o.cwd.replace(/\\\\/g,'/').split('/').pop();
+        if(o.cwd && !cwdFull) cwdFull=o.cwd;
         if(o.entrypoint && !entrypoint) entrypoint=o.entrypoint;
 
         // Only extract content from new messages (after previous write point)
@@ -189,6 +212,7 @@ if [ -n "$transcript_path" ] && [ -f "$transcript_path" ]; then
     // Output structured lines
     if(duration) console.log('DURATION::'+duration);
     if(repo) console.log('REPO::'+repo);
+    if(cwdFull) console.log('CWD::'+cwdFull);
     if(branch) console.log('BRANCH::'+branch);
     if(entrypoint) console.log('ENTRYPOINT::'+entrypoint);
     if(topic) console.log('TOPIC::'+topic);
@@ -216,6 +240,14 @@ prompt_count=$(echo "$overview" | grep '^PROMPTS::' | head -1 | sed 's/^PROMPTS:
 tool_summary=$(echo "$overview" | grep '^TOOLS::' | head -1 | sed 's/^TOOLS:://' || true)
 tokens=$(echo "$overview" | grep '^TOKENS::' | head -1 | sed 's/^TOKENS:://' || true)
 session_files=$(echo "$overview" | grep '^SESSION_FILES::' | head -1 | sed 's/^SESSION_FILES:://' || true)
+
+# Route this session's log into a subfolder if identity.json says so. The transcript's
+# cwd is the real working dir (the hook payload's cwd can differ, e.g. VS Code).
+transcript_cwd=$(echo "$overview" | grep '^CWD::' | head -1 | sed 's/^CWD:://' || true)
+[ -n "$transcript_cwd" ] && cwd_dir="$transcript_cwd"
+subdir=$(route_subdir "$cwd_dir")
+[ -n "$subdir" ] && activity_dir="$activity_dir/$subdir"
+mkdir -p "$activity_dir"
 
 # Determine activity file inside team/<name>/activity/: activity-<repo>.md, fallback to activity.md
 if [ -n "$repo" ]; then

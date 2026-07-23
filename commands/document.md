@@ -1,5 +1,5 @@
 ---
-description: "Generate documentation for any project — based on git history, source code, and Claude Code sessions from team/<name>/activity/*.md"
+description: "Generate documentation for any project — based on git history, source code, and Claude Code sessions from team/<name>/activity/**/*.md"
 argument-hint: "[path/to/project] [--since <date>]"
 ---
 

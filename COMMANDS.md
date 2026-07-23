@@ -13,7 +13,7 @@ Full reference for all claude-office commands, hooks, and local state.
 | `/claude-office:init` | First time, per repo | Clones the vault template, sets up Obsidian config, saves your identity, optionally creates a GitHub repo |
 | `/claude-office:setup-identity` | After `/claude-office:init`, or to reconfigure | Fills out your profile in the vault |
 | `/claude-office:check-in` | Start of any session | Reads your `@name` subsection from each project's Team Notes — recaps last work, shows todos, stamps your profile |
-| `/claude-office:aggregate` | Daily (or on-demand) | Parses all `team/*/activity/*.md` logs + git diffs, writes per-person Team Notes into each project's `status.md` |
+| `/claude-office:aggregate` | Daily (or on-demand) | Parses all `team/*/activity/**/*.md` logs + git diffs, writes per-person Team Notes into each project's `status.md` |
 | `/claude-office:retro` | Weekly | Cross-project synthesis — team velocity, collaboration health, strategic observations |
 | `/claude-office:import-activity` | When onboarding mid-project | Selectively imports past activity into `team/<you>/activity/`. Run bare to see options. |
 
@@ -40,7 +40,7 @@ session-end (automatic)
       │
       ▼
 /claude-office:aggregate (daily, scheduled)
-  reads:  team/*/activity/*.md logs (primary) + git history + project docs
+  reads:  team/*/activity/**/*.md logs (primary) + git history + project docs
   writes: ## Team Notes with per-person subsections into each project's status.md
       │
       ▼
@@ -65,7 +65,33 @@ Stored in `~/.claude-office/` on each machine. Never committed to git.
 
 | File | Purpose |
 |---|---|
-| `identity.json` | Your name and vault path |
+| `identity.json` | Your name, vault path, and optional activity `routes` (see below) |
 | `aggregation-state.json` | Last commit SHA for incremental diff detection |
 | `logs/daily-aggregation.log` | Run history for debugging `/claude-office:aggregate` |
 | `logs/retro.log` | Run history for debugging `/claude-office:retro` |
+
+### Activity Routing (optional)
+
+By default every session logs to `team/<you>/activity/activity-<project>.md`. Add a `routes` map to
+`~/.claude-office/identity.json` to send sessions from certain working directories into subfolders:
+
+```json
+{
+  "name": "Alexandre",
+  "vault": "/home/alexandertg/Documents/ingram",
+  "routes": {
+    "~/Documents/GitHub": "work",
+    "~/Documents/GitHub/loci": "work/loci",
+    "~/private": "personal"
+  }
+}
+```
+
+- Keys are working-directory prefixes (`~` expands). **Longest match wins**, so subfolders inherit their
+  parent's route unless a deeper key overrides it — `~/Documents/GitHub/loci/api` lands in `work/loci/`.
+- Values are subfolders under `team/<you>/activity/`; they are created on demand and cannot escape it.
+- No match → the flat default, `team/<you>/activity/activity-<project>.md`.
+- The filename always follows the working directory name.
+
+**Why subfolders:** they make activity easy to exclude from git. Put a folder like `personal` in the
+vault's `.gitignore` and those logs stay local while the rest of your activity is still shared.

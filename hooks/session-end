@@ -9,8 +9,16 @@ set -euo pipefail
 # present wherever Claude Code runs. Bail silently if it is somehow missing.
 command -v node >/dev/null 2>&1 || exit 0
 
+# Capture stdin FIRST — node -e calls below consume stdin, which would
+# swallow the Stop hook payload (transcript_path, session_id) sent by
+# Claude Code before we get a chance to read it.
+hook_input=$(cat)
+
 IDENTITY_FILE="$HOME/.claude-office/identity.json"
 STATE_FILE="$HOME/.claude-office/last-session-state.json"
+# Shared exclusion pattern for the activity log itself — used by both the
+# bash grep filters below and the JS edited-files filter, kept in sync here.
+ACTIVITY_FILE_REGEX='activity(-.*)?\.md'
 
 [ ! -f "$IDENTITY_FILE" ] && exit 0
 
@@ -30,9 +38,6 @@ member_dir="$VAULT/team/$NAME"
 
 activity_dir="$member_dir/activity"
 mkdir -p "$activity_dir"
-
-# Read Stop hook stdin for session info
-hook_input=$(cat)
 transcript_path=""
 session_id=""
 if [ -n "$hook_input" ]; then
@@ -52,6 +57,11 @@ if [ -n "$hook_input" ]; then
   " 2>/dev/null || echo 'transcript_path=""; session_id=""')"
 fi
 
+# Fallback: if transcript_path is missing (e.g. VS Code extension), find it by session_id
+if [ -z "$transcript_path" ] && [ -n "$session_id" ]; then
+  transcript_path=$(find "$HOME/.claude/projects" -name "${session_id}.jsonl" 2>/dev/null | head -1 || true)
+fi
+
 # Load previous state to avoid duplicate writes
 prev_session=""
 prev_msg_count=0
@@ -61,9 +71,13 @@ if [ -f "$STATE_FILE" ]; then
   [ -z "$prev_msg_count" ] && prev_msg_count=0
 fi
 
-# Fallback: if transcript_path is missing (e.g. VS Code extension), find it by session_id
-if [ -z "$transcript_path" ] && [ -n "$session_id" ]; then
-  transcript_path=$(find "$HOME/.claude/projects" -name "${session_id}.jsonl" 2>/dev/null | head -1 || true)
+# Check and write state atomically inside the lock
+if [ -n "$transcript_path" ] && [ -f "$transcript_path" ] && [ -n "$session_id" ]; then
+  cur_line_count=$(wc -l < "$transcript_path" 2>/dev/null || echo "0")
+  if [ "$prev_session" = "$session_id" ] && [ "$prev_msg_count" -ge "$cur_line_count" ]; then
+    exit 0
+  fi
+  printf '{"session_id":"%s","msg_count":%s}' "$session_id" "$cur_line_count" > "$STATE_FILE"
 fi
 
 # Extract session overview from transcript
@@ -75,6 +89,7 @@ if [ -n "$transcript_path" ] && [ -f "$transcript_path" ]; then
     const prevSession=process.argv[2]||'';
     const prevCount=parseInt(process.argv[3]||'0',10);
     const curSession=process.argv[4]||'';
+    const activityFileRegex=new RegExp('^'+(process.argv[5]||'activity(-.*)?\\.md')+'$');
 
     // Same session as last write? Only process new messages
     const sameSession=(prevSession===curSession && curSession!=='');
@@ -130,7 +145,7 @@ if [ -n "$transcript_path" ] && [ -f "$transcript_path" ]; then
                 if(fp && (b.name==='Edit'||b.name==='Write'||b.name==='MultiEdit')){
                   // Extract basename
                   const base=fp.replace(/\\\\/g,'/').split('/').pop();
-                  if(base && !/^activity(-.*)?\.md$/.test(base)) editedFiles.add(base);
+                  if(base && !activityFileRegex.test(base)) editedFiles.add(base);
                 }
               }
             }
@@ -144,10 +159,6 @@ if [ -n "$transcript_path" ] && [ -f "$transcript_path" ]; then
       console.log('__SKIP__');
       process.exit(0);
     }
-
-    // Save state for next invocation
-    const state=JSON.stringify({session_id:curSession,msg_count:lines.length});
-    fs.writeFileSync(process.argv[5],state);
 
     // Calculate duration
     let duration='';
@@ -172,7 +183,7 @@ if [ -n "$transcript_path" ] && [ -f "$transcript_path" ]; then
 
     // Build file list from tool_use data (files actually edited in session)
     const sessionFiles=[...editedFiles].sort().slice(0,10);
-    const sessionFileStr=sessionFiles.join(', ');
+    let sessionFileStr=sessionFiles.join(', ');
     if(editedFiles.size>10) sessionFileStr+=' (+'+(editedFiles.size-10)+' more)';
 
     // Output structured lines
@@ -187,7 +198,7 @@ if [ -n "$transcript_path" ] && [ -f "$transcript_path" ]; then
     if(toolSummary) console.log('TOOLS::'+toolSummary);
     if(tokensOut>0) console.log('TOKENS::'+tokensIn+'in/'+tokensOut+'out');
     if(sessionFileStr) console.log('SESSION_FILES::'+sessionFileStr);
-  " "$transcript_path" "$prev_session" "$prev_msg_count" "$session_id" "$STATE_FILE" 2>/dev/null || echo "")
+  " "$transcript_path" "$prev_session" "$prev_msg_count" "$session_id" "$ACTIVITY_FILE_REGEX" 2>/dev/null || echo "")
 fi
 
 # Check if we should skip (no new messages)
@@ -213,11 +224,15 @@ else
   activity_file="$activity_dir/activity.md"
 fi
 
-cd "$VAULT" || exit 0
-
-# Also check git for uncommitted changes (complementary to transcript-based files)
-changed_files=$(git diff --name-only HEAD 2>/dev/null | grep -Ev "activity(-.*)?\.md" || true)
-untracked=$(git ls-files --others --exclude-standard 2>/dev/null | grep -Ev "activity(-.*)?\.md" || true)
+# Also check git for uncommitted changes (complementary to transcript-based files).
+# Use `git -C` instead of `cd` so this script's cwd is never touched, and skip
+# both calls entirely if the vault isn't a git repo (avoids two wasted subprocesses).
+changed_files=""
+untracked=""
+if git -C "$VAULT" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  changed_files=$(git -C "$VAULT" diff --name-only HEAD 2>/dev/null | grep -Ev "$ACTIVITY_FILE_REGEX" || true)
+  untracked=$(git -C "$VAULT" ls-files --others --exclude-standard 2>/dev/null | grep -Ev "$ACTIVITY_FILE_REGEX" || true)
+fi
 all_changes=""
 [ -n "$changed_files" ] && all_changes="$changed_files"
 if [ -n "$untracked" ]; then
@@ -287,5 +302,21 @@ short_id=""
   [ -n "$file_list" ] && echo "- Files: $file_list"
   [ -n "$projects" ] && echo "- Projects: $projects"
 } >> "$activity_file"
+
+# Self-healing dedup: remove consecutive duplicate entries (same header line).
+# Handles the race where two concurrent Stop fires both wrote the same block.
+node -e "
+  const fs=require('fs');
+  const f=process.argv[1];
+  const raw=fs.readFileSync(f,'utf8');
+  // Split into blocks on lines starting with '## '
+  const blocks=raw.split(/(?=\n## )/);
+  const deduped=[];
+  for(const b of blocks){
+    const prev=deduped[deduped.length-1]||'';
+    if(b.trim()==='' || b!==prev) deduped.push(b);
+  }
+  if(deduped.length!==blocks.length) fs.writeFileSync(f,deduped.join(''));
+" "$activity_file" 2>/dev/null || true
 
 exit 0

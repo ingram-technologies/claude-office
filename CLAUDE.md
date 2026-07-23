@@ -31,6 +31,7 @@ Each stage reads only the previous stage's output.
 
 - **Metadata injection only.** Hooks inject counts/summaries into the Claude context — *never* raw vault file content. This is a deliberate prompt-injection defense. Preserve it when editing hooks.
 - **`session-end` is scoped to the user.** It writes only to `team/<NAME>/`, never another member's folder, even if other names appear in the conversation.
+- **Sharing is opt-in.** Unrouted working directories log to `team/<NAME>/activity/private/`, which vaults gitignore. Only paths listed in `routes` (value `""` = shared root) leave the machine. `/aggregate` and `/retro` must never read `private/`.
 - **Hooks stay deterministic.** No AI calls in hooks. Pull on start, log on end; commit/push is always manual (obsidian-git handles vault commits).
 - **Incremental aggregation.** `/aggregate` uses git-diff change detection and rebuilds only project status files with new activity, tracking the last SHA in `~/.claude-office/aggregation-state.json`.
 - **The vault is the output, not the input.** `/aggregate` reads activity logs to understand work done in *external* repos.

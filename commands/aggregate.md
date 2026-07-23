@@ -7,6 +7,8 @@ argument-hint: "[--full]"
 
 Run as a **daily scheduled task** or manually. Synthesizes what happened across all projects by parsing activity logs in `team/*/activity/**/*.md` and git history, writes meaningful project narratives into status files.
 
+**Never read `team/*/activity/private/**`.** That folder is gitignored, local-only, and deliberately not shared — exclude it from every glob and every summary below.
+
 These notes are what `/check-in` reads — aggregate is the writer, check-in is the reader.
 
 ## Context

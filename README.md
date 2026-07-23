@@ -50,6 +50,8 @@ Two shell scripts fire automatically at the edges of every session. You never tr
 | `session-start` | When you open Claude Code | Git pulls the vault, injects your identity + open todos |
 | `session-end` | When you close Claude Code | Parses the conversation transcript, writes your activity to `team/<you>/activity/` |
 
+**Sharing is opt-in.** By default a session logs to `team/<you>/activity/private/`, which the vault gitignores — it never reaches the team. A repo becomes shared only when you list it in `routes` in `~/.claude-office/identity.json` (see [COMMANDS.md](COMMANDS.md#activity-routing)).
+
 They are deterministic shell scripts — no AI, no surprises, no context waste. They only inject metadata (counts, not raw file content) to prevent prompt injection.
 
 > **One important detail:** hooks activate only after you restart your session post-install.

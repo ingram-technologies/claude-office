@@ -27,17 +27,20 @@ Write `~/.claude-office/identity.json` if it doesn't already exist:
 }
 ```
 
-Optionally, sessions can be routed into subfolders of `team/<name>/activity/` by working directory —
-add a `routes` map (keys are path prefixes, longest match wins so subfolders inherit, values are
-subfolders under `activity/`). Mention it as a way to keep some logs out of git:
+Tell the user that **sharing is opt-in**: by default every session logs to
+`team/<name>/activity/private/`, which the vault gitignores, so nothing is shared until they route it.
+To share a repo with the team, add a `routes` map (keys are working-directory prefixes, longest match
+wins so subfolders inherit, values are subfolders under `activity/` — `""` means the shared root):
 
 ```json
 {
   "name": "<name>",
   "vault": "<vault-path>",
-  "routes": { "~/work": "work", "~/private": "personal" }
+  "routes": { "~/Documents/GitHub/our-product": "", "~/work": "work" }
 }
 ```
+
+Offer to fill in `routes` for the repos they want shared.
 
 Verify the vault path exists and contains `CLAUDE.md`. Verify `/team/<name>/` exists. If not, offer to create it from `/team/_new_user/` — copy the folder, replace all `<PUT YOUR NAME HERE>` placeholders with their name.
 
@@ -114,7 +117,8 @@ After setup is complete, give the user a brief orientation:
 > **Your files:**
 > - `team/<name>/profile.md` — your bio (what we just filled out)
 > - `team/<name>/tasks.md` — your personal todo list (only you manage this)
-> - `team/<name>/activity/` — automatic log of your sessions, one file per project (plugin writes this). Sessions can be routed into subfolders per working directory via `routes` in `identity.json`, which is handy for gitignoring the ones you don't want to share
+> - `team/<name>/activity/` — automatic log of your sessions, one file per project (plugin writes this)
+> - `team/<name>/activity/private/` — where sessions land by default, gitignored. Sharing is opt-in: add the repo to `routes` in `identity.json` to move its log into the shared `activity/` folder
 >
 > **Task tracking happens in GitHub** — the vault is for documentation and coordination.
 >

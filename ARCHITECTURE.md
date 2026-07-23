@@ -38,6 +38,9 @@ Hooks parse JSON and conversation transcripts with `node`, never python. Claude 
 Hooks run on Linux, macOS (BSD coreutils, bash 3.2), and Git Bash on Windows. They avoid GNU-only flags (`sed -i`, `grep -P`, `readlink -f`, `date -d`) and are pinned to LF line endings via `.gitattributes` — CRLF would break them under Git Bash (`$'\r': command not found`). The `run-hook.cmd` polyglot wrapper lets the same entry point work from cmd.exe and from a Unix shell.
 
 
+**Sharing is opt-in, not opt-out.**  
+A session whose working directory matches no entry in `routes` logs to `team/<you>/activity/private/`, which vaults gitignore. Publishing a repo to the team is an explicit act — adding it to `routes` in `identity.json`. The alternative (share everything, blacklist what hurts) fails silently and fails late: you find out a client repo leaked after it is already pushed. Defaulting to private makes the failure mode "my teammates can't see this yet", which is recoverable.
+
 **Incremental aggregation.**  
 `/aggregate` uses git-diff change detection and only rebuilds project status files that have new activity since the last run. It tracks state in `~/.claude-office/aggregation-state.json`.
 

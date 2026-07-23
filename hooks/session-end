@@ -29,18 +29,20 @@ parse_json() {
 }
 
 # Longest matching prefix in identity.json "routes" wins, so subfolders inherit their parent's route.
-# Prints the destination subfolder (relative to the activity dir), or nothing.
+# Prints the destination subfolder (relative to the activity dir). Unrouted sessions default to
+# "private" — sharing a log is opt-in, so a repo nobody routed never lands in the shared activity dir.
 route_subdir() {
   node -e '
     const fs=require("fs"),os=require("os");
     const routes=(JSON.parse(fs.readFileSync(process.argv[1],"utf8")).routes)||{};
     const cwd=(process.argv[2]||"").replace(/\\/g,"/").replace(/\/+$/,"");
-    let best="",bestLen=-1;
+    let best=null,bestLen=-1;
     for(const [k,v] of Object.entries(routes)){
       const pre=String(k).replace(/\\/g,"/").replace(/^~/,os.homedir()).replace(/\/+$/,"");
       if(!pre||(cwd!==pre&&!cwd.startsWith(pre+"/"))) continue;
       if(pre.length>bestLen){bestLen=pre.length;best=String(v);}
     }
+    if(best===null) best="private";
     // stay inside the activity dir regardless of what the config says
     best=best.replace(/\\/g,"/").replace(/^\/+/,"").split("/").filter(s=>s&&s!=="."&&s!=="..").join("/");
     process.stdout.write(best);

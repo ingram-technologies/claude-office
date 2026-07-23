@@ -70,19 +70,22 @@ Stored in `~/.claude-office/` on each machine. Never committed to git.
 | `logs/daily-aggregation.log` | Run history for debugging `/claude-office:aggregate` |
 | `logs/retro.log` | Run history for debugging `/claude-office:retro` |
 
-### Activity Routing (optional)
+### Activity Routing
 
-By default every session logs to `team/<you>/activity/activity-<project>.md`. Add a `routes` map to
-`~/.claude-office/identity.json` to send sessions from certain working directories into subfolders:
+**Sharing is opt-in.** A session whose working directory matches no route logs to
+`team/<you>/activity/private/activity-<project>.md`, and vault `.gitignore` keeps
+`team/*/activity/private/` out of git. Nothing you work on reaches the team until you say so.
+
+To share a repo, route it with a `routes` map in `~/.claude-office/identity.json`:
 
 ```json
 {
   "name": "Alexandre",
-  "vault": "/home/alexandertg/Documents/ingram",
+  "vault": "/home/alexandertg/Documents/GitHub/sandbox-office-vault",
   "routes": {
+    "~/Documents/GitHub/claude-office": "",
     "~/Documents/GitHub": "work",
-    "~/Documents/GitHub/loci": "work/loci",
-    "~/private": "personal"
+    "~/Documents/GitHub/loci": "work/loci"
   }
 }
 ```
@@ -90,8 +93,9 @@ By default every session logs to `team/<you>/activity/activity-<project>.md`. Ad
 - Keys are working-directory prefixes (`~` expands). **Longest match wins**, so subfolders inherit their
   parent's route unless a deeper key overrides it — `~/Documents/GitHub/loci/api` lands in `work/loci/`.
 - Values are subfolders under `team/<you>/activity/`; they are created on demand and cannot escape it.
-- No match → the flat default, `team/<you>/activity/activity-<project>.md`.
+- `""` means the shared activity root, `team/<you>/activity/activity-<project>.md`.
+- No match → `private/`, which is gitignored.
 - The filename always follows the working directory name.
 
-**Why subfolders:** they make activity easy to exclude from git. Put a folder like `personal` in the
-vault's `.gitignore` and those logs stay local while the rest of your activity is still shared.
+**Why subfolders:** any subfolder can be gitignored, so you can keep more than one tier — e.g. a `work/`
+folder shared with the team and `private/` that never leaves your machine.

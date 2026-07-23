@@ -21,8 +21,9 @@ Use this knowledge to **read relevant docs when they'd help answer a question or
       tasks.md           # Personal todos (P0-P3 priority, Dataview fields)
       activity/
         activity.md      # Auto-generated session log (append-only)
-        activity-*.md    # Per-project activity logs (default behavior)
-        <route>/         # Optional subfolders, routed by working dir (may be gitignored)
+        activity-*.md    # Per-project logs for repos explicitly routed as shared
+        private/         # Default landing spot for unrouted repos — gitignored, never summarize it
+        <route>/         # Other subfolders, routed by working dir via identity.json
     _new_user/           # Template for onboarding new members
     roster.md            # Dataview query listing all team members
   projects/

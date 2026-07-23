@@ -11,6 +11,7 @@ cat > "$T/home/.claude-office/identity.json" <<EOF
 {"name":"Tester","vault":"$T/vault","routes":{
   "$T/work":"work",
   "$T/work/loci":"work/loci",
+  "$T/shared":"",
   "$T/secret":"../../escape"
 }}
 EOF
@@ -34,7 +35,10 @@ expect "activity/work/loci/activity-api.md"
 run "work/batman"      # shorter prefix still applies
 expect "activity/work/activity-batman.md"
 
-run "elsewhere/thing"  # no route -> flat activity dir
+run "elsewhere/thing"  # no route -> private by default
+expect "activity/private/activity-thing.md"
+
+run "shared/thing"     # empty route value -> shared activity root
 expect "activity/activity-thing.md"
 
 run "secret/x"         # ".." in config cannot escape the activity dir

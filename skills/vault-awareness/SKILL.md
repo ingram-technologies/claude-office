@@ -30,6 +30,8 @@ Use this knowledge to **read relevant docs when they'd help answer a question or
     <project>/
       status.md          # Overview, tech stack, dependencies, active tasks
       kanban.md          # Backlog / To Do / In Progress / Review / Done
+      meetings/          # Hand-written meeting notes, named by date (M-DD-YY.md),
+                         # participants in frontmatter. Whiteboard photos live here too.
       architecture.md    # Technical architecture and components
       decisions.md       # Key decisions (tagged #decision)
       timeline.md        # Milestones and project evolution
@@ -53,6 +55,7 @@ Not every project has every file — check what exists before reading.
 | Architecture and technical design | `projects/<project>/architecture.md` |
 | Past decisions and rationale | `projects/<project>/decisions.md` |
 | What's in progress / blocked | `projects/<project>/kanban.md` |
+| What the team decided or agreed in a meeting | `projects/<project>/meetings/*.md` |
 | Cross-project weekly summary | `projects/weekly reports/YYYY-WXX.md` |
 | Per-person project briefings | `## Team Notes` section in `projects/<project>/status.md` |
 
@@ -90,6 +93,6 @@ These are slash commands the user can run. You don't run them — but knowing th
 | Command | What it does |
 |---|---|
 | `/check-in` | Personalized session briefing — recaps recent work, shows project priorities and todos |
-| `/aggregate` | Daily scan — parses git + activity logs, writes per-person notes into project status files |
+| `/aggregate` | Daily scan — parses git + activity logs + meeting notes, writes per-person notes into project status files |
 | `/retro` | Weekly retrospective — cross-project synthesis for team sync |
 | `/setup-identity` | First-time onboarding — configures name, vault path, and profile |

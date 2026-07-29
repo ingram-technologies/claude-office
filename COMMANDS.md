@@ -13,7 +13,7 @@ Full reference for all claude-office commands, hooks, and local state.
 | `/claude-office:init` | First time, per repo | Clones the vault template, sets up Obsidian config, saves your identity, optionally creates a GitHub repo |
 | `/claude-office:setup-identity` | After `/claude-office:init`, or to reconfigure | Fills out your profile in the vault |
 | `/claude-office:check-in` | Start of any session | Reads your `@name` subsection from each project's Team Notes — recaps last work, shows todos, stamps your profile |
-| `/claude-office:aggregate` | Daily (or on-demand) | Parses all `team/*/activity/**/*.md` logs + git diffs, writes per-person Team Notes into each project's `status.md` |
+| `/claude-office:aggregate` | Daily (or on-demand) | Parses all `team/*/activity/**/*.md` logs + `projects/*/meetings/**/*.md` + git diffs, writes per-person Team Notes and meeting decisions/commitments into each project's `status.md` |
 | `/claude-office:retro` | Weekly | Cross-project synthesis — team velocity, collaboration health, strategic observations |
 | `/claude-office:import-activity` | When onboarding mid-project | Selectively imports past activity into `team/<you>/activity/`. Run bare to see options. |
 
@@ -40,8 +40,10 @@ session-end (automatic)
       │
       ▼
 /claude-office:aggregate (daily, scheduled)
-  reads:  team/*/activity/**/*.md logs (primary) + git history + project docs
-  writes: ## Team Notes with per-person subsections into each project's status.md
+  reads:  team/*/activity/**/*.md logs (what was done)
+        + projects/*/meetings/**/*.md (what was decided and committed to)
+        + git history + project docs
+  writes: ## From Meetings and ## Team Notes into each project's status.md
       │
       ▼
 /claude-office:check-in (per person, on demand)

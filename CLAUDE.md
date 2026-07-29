@@ -23,9 +23,11 @@ Three moving parts, connected by a strictly one-directional data flow:
 
 **Data flow (never loops back):**
 ```
-session-end → team/<you>/activity/*.md → /aggregate → projects/*/status.md (Team Notes) → /check-in & /retro
+session-end → team/<you>/activity/*.md ─┐
+                                        ├→ /aggregate → projects/*/status.md → /check-in & /retro
+projects/*/meetings/*.md (hand-written) ┘              (From Meetings + Team Notes)
 ```
-Each stage reads only the previous stage's output.
+Each stage reads only the previous stage's output. Meeting notes are the one human-authored input — `/aggregate` reads them, never writes them.
 
 ## Critical Invariants (do not break these)
 
@@ -35,6 +37,7 @@ Each stage reads only the previous stage's output.
 - **Hooks stay deterministic.** No AI calls in hooks. Pull on start, log on end; commit/push is always manual (obsidian-git handles vault commits).
 - **Incremental aggregation.** `/aggregate` uses git-diff change detection and rebuilds only project status files with new activity, tracking the last SHA in `~/.claude-office/aggregation-state.json`.
 - **The vault is the output, not the input.** `/aggregate` reads activity logs to understand work done in *external* repos.
+- **Meeting notes are read-only.** `projects/*/meetings/**/*.md` are hand-written by the people who were there. `/aggregate` extracts decisions, owner-tagged action items, and open questions from them, but never edits them — not even to tick a checkbox. Only `*.md`; the folders also hold whiteboard photos.
 
 ## Local State (per machine, never committed)
 

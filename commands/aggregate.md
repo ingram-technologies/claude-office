@@ -63,6 +63,7 @@ Read `~/.claude-office/aggregation-state.json`:
 {
   "last_run": "2026-03-29T22:00:00Z",
   "last_commit": "abc1234",
+  "emitted_tasks": [],
   "errors": []
 }
 ```
@@ -204,20 +205,68 @@ For each affected project's `status.md`, write a `## Team Notes` section inside 
 - For inactive assigned people, just note they're assigned with no activity — no judgment
 - If someone is new to the project (first commits this week), note it
 
-### 7. Update State & Log
+### 7. Sync Loose Tasks Onto the Kanban
 
-Write `~/.claude-office/aggregation-state.json` with current commit SHA and errors.
+Commitments written into `status.md` prose sit there and rot — nobody moves a paragraph. The board is where a task can be picked up, so put each one on it as a real card.
+
+**Aggregate owns exactly one lane per board: `## Inbox (auto)`.** Create it as the first lane if the heading is missing. Never add, reword, reorder, tick or delete a card in any other lane — those belong to the team.
+
+Do this per affected project that has a `kanban.md`, in order:
+
+**7a. Collect candidates.** Two sources, both already read in earlier steps:
+
+| Source | What counts |
+|---|---|
+| Meeting notes (step 4) | Open commitments — unchecked action items, owner tag if present |
+| Project notes (`projects/<project>/**/*.md`) | Stray unchecked `- [ ]` lines living in ordinary docs — an architecture note, a research page, a decision log |
+
+Skip `kanban.md` itself, `meetings/`, the auto-generated block of `status.md`, and any `team/` path. Nested sub-items belong to their parent — take the parent line only.
+
+**7b. Merge duplicates before anything else.** The same todo written in three notes is one task. Two lines are the same task when they name the same action on the same object, even with different words — "ask Nico for the pod token" and "get token from Nico for pod access". Emit one card, link every source note it came from. If they conflict rather than repeat (same object, different action), that is a coordination flag for step 5, not a merge.
+
+**7c. Drop what is already tracked:**
+
+- Text that already appears **anywhere on the board**, any lane, checked or not. Compare loosely — lowercase, strip tags, dates, links, punctuation. A card someone dragged to *In Progress* and reworded is still that card; when unsure, skip it.
+- Anything in `emitted_tasks` in the aggregation state. Emitted once and now absent from the board means a human deleted it on purpose.
+
+**7d. Append the survivors** to `Inbox (auto)`, one line each:
+
+```markdown
+- [ ] Task text #Owner (from [[projects/<project>/meetings/7-20-26|7-20 meeting]])
+```
+
+Owner tags match team folders case-insensitively, same as step 6; no owner means no tag, still emit. Keep the wording the person used — this is a card, not a rewrite.
+
+**7e. Leave the source alone.** The stray checkbox stays where it was written; the card links back to it. Never edit a note to move a task out of it.
+
+**7f. Record** each appended card's normalized text in `emitted_tasks`, so the next run does not resurrect a deleted one.
+
+**Pod content is never emitted.** Notes mirrored under `team/*/pod*/` are gitignored on purpose — one person's read access is not the team's, and a card on a shared board would leak it. Pod todos surface through Dataview queries in each person's `tasks.md`: local, live, and scoped to whatever pods that person can actually read.
+
+### 8. Update State & Log
+
+Write `~/.claude-office/aggregation-state.json` with current commit SHA, errors, and emitted cards:
+
+```json
+{
+  "last_run": "2026-03-29T22:00:00Z",
+  "last_commit": "abc1234",
+  "emitted_tasks": ["ask nico for the pod token"],
+  "errors": []
+}
+```
 
 Append to `~/.claude-office/logs/daily-aggregation.log`:
 ```
 [2026-03-30T22:00:00Z] RUN daily-aggregation
   mode: incremental | affected_projects: [ingram-cloud, security]
   meetings_parsed: 3 | open_commitments: 7
+  cards_emitted: 4 | merged_duplicates: 2
   coordination_flags: 2 | errors: none | commit: abc1234
 ---
 ```
 
-### 8. Commit and Push
+### 9. Commit and Push
 
 ```bash
 git add projects/
@@ -230,7 +279,11 @@ Skip commit if nothing changed.
 ## Guardrails
 
 - **Read-only** on team folders — only writes to `/projects/`
-- **Read-only on `projects/*/meetings/`** — meeting notes are hand-written by the people who were there. Never edit, reformat, tick a checkbox, or append to them. Aggregate's output goes in `status.md` only
+- **Read-only on `projects/*/meetings/`** — meeting notes are hand-written by the people who were there. Never edit, reformat, tick a checkbox, or append to them. Aggregate's output goes in `status.md` and the board's `Inbox (auto)` lane only
+- **One lane on each board** — `## Inbox (auto)`, append-only. Every other lane is the team's; a card only leaves the Inbox because a human moved it
+- **No `<!-- auto-generated -->` markers in `kanban.md`** — the Kanban plugin rewrites the file whenever someone drags a card and does not preserve them. The lane heading is the marker
+- **Pod folders are out of scope** — never read, summarize, or emit `team/*/pod*/`. Gitignored, per-person, and not the team's to publish
+- `emitted_tasks` is local state, so a second machine can re-emit a card someone deleted, once. Ticking a card into *Done* instead of deleting it prevents that (`ponytail:` per-machine memory, move to a committed ledger only if it actually bites)
 - **Activity logs are the primary lens** — parse `team/*/activity/**/*.md` for external repo context, not just vault edits
 - **Meeting notes are the intent lens** — parse `projects/*/meetings/**/*.md` for decisions and commitments; they say what *should* be happening
 - **Git history supplements** — shows what files changed in the vault itself

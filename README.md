@@ -65,7 +65,7 @@ activity logs  →  /claude-office:aggregate  →  status.md files  →  /claude
    (amber)         (glue cmd)       (in the vault)     (on-demand)     (briefed & ready)
 ```
 
-- **`/claude-office:aggregate`** — parses all activity logs, writes per-person summaries into each project's `status.md`, and sweeps loose todos out of meeting notes and project docs onto the board's `Inbox (auto)` lane. Run daily, or less often. Only one person has to run this.
+- **`/claude-office:aggregate`** — parses all activity logs, writes per-person summaries into each project's `status.md`, and gives every loose todo in a meeting note or project doc a home: one owner routes it to `team/<them>/tasks.md`, several owners or none puts it on the board's `Inbox (auto)` lane. The source line keeps the sentence and points at where it went, so nothing is ever open in two places. Run daily, or less often. Only one person has to run this.
 - **`/claude-office:check-in`** — reads your subsection from each project's status, hands you back a personalized briefing.
 - **`/claude-office:retro`** — weekly synthesis across all projects, for strategic perspective.
 

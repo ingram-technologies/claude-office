@@ -8,7 +8,7 @@
     {
       "name": "claude-office",
       "description": "Ingram Office vault plugin: activity tracking, aggregation, retrospectives",
-      "version": "1.2.2",
+      "version": "1.3.0",
       "source": "./"
     }
   ]

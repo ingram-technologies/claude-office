@@ -13,7 +13,7 @@ Full reference for all claude-office commands, hooks, and local state.
 | `/claude-office:init` | First time, per repo | Clones the vault template, sets up Obsidian config, saves your identity, optionally creates a GitHub repo |
 | `/claude-office:setup-identity` | After `/claude-office:init`, or to reconfigure | Fills out your profile in the vault |
 | `/claude-office:check-in` | Start of any session | Reads your `@name` subsection from each project's Team Notes — recaps last work, shows todos, stamps your profile |
-| `/claude-office:aggregate` | Daily (or on-demand) | Parses all `team/*/activity/**/*.md` logs + `projects/*/meetings/**/*.md` + git diffs, writes per-person Team Notes and meeting decisions/commitments into each project's `status.md`, and collects loose todos scattered across project notes onto the board's `Inbox (auto)` lane |
+| `/claude-office:aggregate` | Daily (or on-demand) | Parses all `team/*/activity/**/*.md` logs + `projects/*/meetings/**/*.md` + git diffs, writes per-person Team Notes and meeting decisions/commitments into each project's `status.md`, and gives every loose todo scattered across meeting notes and project docs a single home — one owner routes to `team/<them>/tasks.md`, many or none to the board's `Inbox (auto)` lane |
 | `/claude-office:retro` | Weekly | Cross-project synthesis — team velocity, collaboration health, strategic observations |
 | `/claude-office:import-activity` | When onboarding mid-project | Selectively imports past activity into `team/<you>/activity/`. Run bare to see options. |
 
@@ -44,7 +44,10 @@ session-end (automatic)
         + projects/*/meetings/**/*.md (what was decided and committed to)
         + git history + project docs
   writes: ## From Meetings and ## Team Notes into each project's status.md
-        + one card per untracked todo into kanban.md → ## Inbox (auto)
+        + every homeless todo into exactly one home:
+            one owner  → team/<them>/tasks.md → ## Active
+            many/none  → kanban.md → ## Inbox (auto)
+          (source line keeps the sentence, loses the checkbox, gains → [[home]])
       │
       ▼
 /claude-office:check-in (per person, on demand)

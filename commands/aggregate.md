@@ -1,11 +1,11 @@
 ---
-description: "Run daily aggregation — update project status from activity logs and git history"
+description: "Run daily aggregation — update project status and boards from activity logs, meetings, and git history"
 argument-hint: "[--full]"
 ---
 
 ## When to Use
 
-Run as a **daily scheduled task** or manually. Synthesizes what happened across all projects by parsing activity logs in `team/*/activity/**/*.md`, meeting notes in `projects/*/meetings/**/*.md`, and git history, writes meaningful project narratives into status files.
+Run as a **daily scheduled task** or manually. Synthesizes what happened across all projects by parsing activity logs in `team/*/activity/**/*.md`, meeting notes in `projects/*/meetings/**/*.md`, and git history, writes meaningful project narratives into status files, and puts loose todos onto each project's board where they can actually be picked up.
 
 **Never read `team/*/activity/private/**`.** That folder is gitignored, local-only, and deliberately not shared — exclude it from every glob and every summary below.
 
@@ -113,7 +113,7 @@ Notes are named by date (`M-DD-YY.md`), participants in frontmatter. Neither is 
 Extract:
 
 - **Decisions** — what was settled, and the reasoning if given. These outrank activity logs: a decision is the team's intent, an activity log is one person's execution.
-- **Action items with owners** — unchecked boxes and `#task` lines carry owner tags (`#Alex`, `#Nico`), sometimes a Tasks-plugin due date (`@📅 YYYY-MM-DD`). Map each to a person and fold into their Team Notes.
+- **Action items with owners** — unchecked boxes and `#task` lines carry owner tags (`#Alex`, `#Nico`), sometimes a Tasks-plugin due date (`@📅 YYYY-MM-DD`). Map each to a person and fold into their Team Notes — step 7 also puts the still-open ones on the board, so keep the list, don't consume it here.
 - **Completed items** — checked boxes mean the commitment landed. Cross-check against activity logs.
 - **Open questions** — unresolved threads ("what app to use for tasks?"). These become standup topics, not decisions.
 - **Participants** — from frontmatter, else the names in the body. Who is engaged with the project, and who is assigned but never in the room.
@@ -211,7 +211,7 @@ Commitments written into `status.md` prose sit there and rot — nobody moves a 
 
 **Aggregate owns exactly one lane per board: `## Inbox (auto)`.** Create it as the first lane if the heading is missing. Never add, reword, reorder, tick or delete a card in any other lane — those belong to the team.
 
-Do this per affected project that has a `kanban.md`, in order:
+Do this per project that has a `kanban.md`, in order. Affected projects only on an incremental run — except that a stray todo can sit in a note nobody has touched since, so a full scan (`--full`, or first run) sweeps every project's docs regardless of what changed.
 
 **7a. Collect candidates.** Two sources, both already read in earlier steps:
 
@@ -222,7 +222,7 @@ Do this per affected project that has a `kanban.md`, in order:
 
 Skip `kanban.md` itself, `meetings/`, the auto-generated block of `status.md`, and any `team/` path. Nested sub-items belong to their parent — take the parent line only.
 
-**7b. Merge duplicates before anything else.** The same todo written in three notes is one task. Two lines are the same task when they name the same action on the same object, even with different words — "ask Nico for the pod token" and "get token from Nico for pod access". Emit one card, link every source note it came from. If they conflict rather than repeat (same object, different action), that is a coordination flag for step 5, not a merge.
+**7b. Merge duplicates before anything else.** The same todo written in three notes is one task. Two lines are the same task when they name the same action on the same object, even with different words — "ask Nico for the pod token" and "get token from Nico for pod access". Emit one card, link every source note it came from. If they conflict rather than repeat (same object, different action), that is not a merge: emit both cards, and add the clash to `Coordination Flags` in `/projects/status.md` — that section was written in step 5, so this is an edit to it, not a note for later.
 
 **7c. Drop what is already tracked:**
 
@@ -236,6 +236,8 @@ Skip `kanban.md` itself, `meetings/`, the auto-generated block of `status.md`, a
 ```
 
 Owner tags match team folders case-insensitively, same as step 6; no owner means no tag, still emit. Keep the wording the person used — this is a card, not a rewrite.
+
+The backlink is the one place "never list file names" does not apply. A narrative naming files is noise; a card that cannot be traced back to where it was written is unverifiable, and the source note is the only thing that says whether the todo is still real.
 
 **7e. Leave the source alone.** The stray checkbox stays where it was written; the card links back to it. Never edit a note to move a task out of it.
 

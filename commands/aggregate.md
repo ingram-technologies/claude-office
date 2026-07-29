@@ -281,6 +281,8 @@ Skip commit if nothing changed.
 - **Read-only** on team folders — only writes to `/projects/`
 - **Read-only on `projects/*/meetings/`** — meeting notes are hand-written by the people who were there. Never edit, reformat, tick a checkbox, or append to them. Aggregate's output goes in `status.md` and the board's `Inbox (auto)` lane only
 - **One lane on each board** — `## Inbox (auto)`, append-only. Every other lane is the team's; a card only leaves the Inbox because a human moved it
+- **Nothing is ever moved** — a swept todo stays in the note where its author wrote it. The card is a pointer with a backlink, not a relocation. Never delete, tick, reword or cut a source line, in any file, for any reason. A person's list stays theirs to edit
+- **Personal task files are never swept** — `team/<person>/tasks.md` is a private list that happens to live in a shared repo. Reading it to understand priorities is fine; copying a line out of it onto a shared board is not
 - **No `<!-- auto-generated -->` markers in `kanban.md`** — the Kanban plugin rewrites the file whenever someone drags a card and does not preserve them. The lane heading is the marker
 - **Pod folders are out of scope** — never read, summarize, or emit `team/*/pod*/`. Gitignored, per-person, and not the team's to publish
 - `emitted_tasks` is local state, so a second machine can re-emit a card someone deleted, once. Ticking a card into *Done* instead of deleting it prevents that (`ponytail:` per-machine memory, move to a committed ledger only if it actually bites)
